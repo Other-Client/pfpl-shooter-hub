@@ -1,65 +1,251 @@
-import Image from "next/image";
+// src/app/page.tsx
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background:
+          "radial-gradient(circle at top left, #1f2937, #020617 60%)",
+        color: "white",
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+      }}
+    >
+      {/* Top bar */}
+      <header
+        style={{
+          padding: "1.25rem 2rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid rgba(148, 163, 184, 0.25)",
+          backdropFilter: "blur(10px)",
+          background: "rgba(15, 23, 42, 0.75)",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span
+            style={{
+              fontSize: "0.75rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.15em",
+              color: "#9ca3af",
+            }}
+          >
+            Company
+          </span>
+          <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
+            Precihole Sports Foundation
+          </span>
+        </div>
+
+        <nav style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          <span style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
+            Platform:
+          </span>
+          <span
+            style={{
+              fontSize: "1rem",
+              fontWeight: 600,
+              padding: "0.25rem 0.75rem",
+              borderRadius: "999px",
+              border: "1px solid rgba(148, 163, 184, 0.5)",
+              background: "rgba(15,23,42,0.9)",
+            }}
+          >
+            Shooter Hub
+          </span>
+
+          <Link
+            href="/login"
+            style={{
+              padding: "0.55rem 1.25rem",
+              borderRadius: "999px",
+              border: "1px solid transparent",
+              background:
+                "linear-gradient(135deg, #f97316, #eab308, #22c55e)",
+              fontSize: "0.9rem",
+              fontWeight: 600,
+              color: "black",
+              textDecoration: "none",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+            }}
+          >
+            Login
+          </Link>
+        </nav>
+      </header>
+
+      {/* Hero + content */}
+      <section
+        style={{
+          flex: 1,
+          padding: "3rem 2rem 4rem",
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1.6fr)",
+          gap: "3rem",
+          maxWidth: "1120px",
+          margin: "0 auto",
+          alignItems: "center",
+        }}
+      >
+        {/* Left: text */}
+        <div>
+          <p
+            style={{
+              fontSize: "0.85rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.25em",
+              color: "#a5b4fc",
+              marginBottom: "0.75rem",
+            }}
+          >
+            VR Performance Platform
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <h1
+            style={{
+              fontSize: "2.7rem",
+              lineHeight: 1.1,
+              fontWeight: 700,
+              marginBottom: "1rem",
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Shooter Hub:  
+            <span style={{ color: "#f97316" }}> Train, Track</span> &{" "}
+            <span style={{ color: "#22c55e" }}>Transform</span> Every Shot.
+          </h1>
+
+          <p
+            style={{
+              fontSize: "1rem",
+              color: "#e5e7eb",
+              maxWidth: "34rem",
+              marginBottom: "1.5rem",
+            }}
           >
-            Documentation
-          </a>
+            Shooter Hub is the official performance companion by{" "}
+            <strong>Precihole Sports Foundation</strong> – connecting your VR
+            shooting range to detailed analytics. Every session, every shot,
+            every tiny improvement is captured and visualised in one place.
+          </p>
+
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: "0 0 2rem",
+              display: "grid",
+              gap: "0.6rem",
+              fontSize: "0.95rem",
+              color: "#d1d5db",
+            }}
+          >
+            <li>• Track live scores, groups, and shot patterns over time.</li>
+            <li>• Compare training sessions and export detailed reports.</li>
+            <li>• Designed for athletes, coaches, and academies.</li>
+          </ul>
+
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <Link
+              href="/login"
+              style={{
+                padding: "0.8rem 1.7rem",
+                borderRadius: "999px",
+                background:
+                  "linear-gradient(135deg, #f97316, #eab308, #22c55e)",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                color: "#020617",
+                textDecoration: "none",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+              }}
+            >
+              Login to Shooter Hub
+            </Link>
+
+            <span style={{ fontSize: "0.85rem", color: "#9ca3af" }}>
+              Access is restricted to registered shooters & coaches.
+            </span>
+          </div>
         </div>
-      </main>
-    </div>
+
+        {/* Right: simple “card” explaining steps */}
+        <div
+          style={{
+            borderRadius: "1.5rem",
+            padding: "1.75rem",
+            background:
+              "linear-gradient(145deg, rgba(15,23,42,0.9), rgba(30,64,175,0.95))",
+            border: "1px solid rgba(148, 163, 184, 0.5)",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.55)",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: 600,
+              marginBottom: "1rem",
+            }}
+          >
+            How Shooter Hub fits your range:
+          </h2>
+
+          <ol
+            style={{
+              margin: 0,
+              paddingLeft: "1.25rem",
+              display: "grid",
+              gap: "0.7rem",
+              fontSize: "0.9rem",
+            }}
+          >
+            <li>
+              <strong>Log in</strong> to your Shooter Hub account.
+            </li>
+            <li>
+              <strong>Start a session</strong> in the VR shooting range –
+              every shot is logged automatically.
+            </li>
+            <li>
+              <strong>Review analytics</strong> – heatmaps, grouping, bias,
+              and detailed scores.
+            </li>
+            <li>
+              <strong>Download or share</strong> training reports with your
+              shooter or coach.
+            </li>
+          </ol>
+
+          <div
+            style={{
+              marginTop: "1.5rem",
+              padding: "0.9rem 1rem",
+              borderRadius: "1rem",
+              background: "rgba(15,23,42,0.85)",
+              border: "1px dashed rgba(148, 163, 184, 0.6)",
+              fontSize: "0.85rem",
+              color: "#e5e7eb",
+            }}
+          >
+            Ready to begin?{" "}
+            <Link
+              href="/login"
+              style={{
+                color: "#fbbf24",
+                textDecoration: "underline",
+                textUnderlineOffset: "2px",
+              }}
+            >
+              Login now
+            </Link>{" "}
+            to access your Shooter Hub dashboard.
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
