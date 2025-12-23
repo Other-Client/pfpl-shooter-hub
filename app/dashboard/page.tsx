@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { Shot } from "@/models/Shot";
 import { CreateDummySessionButton } from "@/components/CreateDummySession";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -85,7 +86,28 @@ export default async function DashboardPage() {
             />
           )}
         </section>
-         <div style={{ marginBottom: "1.5rem" }}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <Link href="/experience?gameId=demo">
+            <button
+              style={{
+                padding: "1rem 2rem",
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                color: "white",
+                border: "none",
+                borderRadius: "0.75rem",
+                fontSize: "1.125rem",
+                fontWeight: "600",
+                boxShadow: "0 10px 25px rgba(16, 185, 129, 0.3)",
+                cursor: "pointer",
+                minWidth: "200px",
+                display: "inline-block",
+              }}
+            >
+              🚀 Start VR Experience
+            </button>
+          </Link>
+        </div>
+        <div style={{ marginBottom: "1.5rem" }}>
           <CreateDummySessionButton />
         </div>
 

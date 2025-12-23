@@ -73,6 +73,7 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         (session.user as any).id = token.userId;
         (session.user as any).role = token.role;
+        (session as any).accessToken = token;
       }
       return session;
     },

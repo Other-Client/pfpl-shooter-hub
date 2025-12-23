@@ -10,25 +10,42 @@ function ExperienceContent() {
 //   const gameId = searchParams.get("gameId");
   const gameId = "691c09f80db2cdf1dd52bae1";
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
-  const EXPERINCE_URL = "https://app.zimension3d.com/#/world/"
+  const [rawToken, setRawToken] = useState<string | null>(null);
+  const EXPERINCE_URL = "https://app.zimension3d.com/#/world"
 
   useEffect(() => {
     if (status === "loading") return;
-    let token =  'sadasdasdas';
-    // if (!session?.accessToken) {
-    //   // Redirect to login or show error
-    //   return;
-    // }
+
+    // Fetch the raw JWT token
+    const fetchToken = async () => {
+      try {
+        const response = await fetch('/api/auth/token');
+        if (response.ok) {
+          const data = await response.json();
+          setRawToken(data.token);
+          console.log("Raw JWT Token:", data.token);
+        } else {
+          console.error("Failed to fetch token");
+        }
+      } catch (error) {
+        console.error("Error fetching token:", error);
+      }
+    };
+
+    fetchToken();
 
     if (!gameId) {
       // Show error or redirect
-    //   return;
+      return;
     }
 
     // Assuming the iframe URL is something like this - adjust as needed
-    const src = `${EXPERINCE_URL}/${gameId}?token=${token}`;
+    const src = rawToken
+      ? `${EXPERINCE_URL}/${gameId}?apptoken=${rawToken}`
+      : `${EXPERINCE_URL}/${gameId}`;
+    console.log("Iframe src:", src)
     setIframeSrc(src);
-  }, [session, status, gameId]);
+  }, [session, status, gameId, rawToken]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
