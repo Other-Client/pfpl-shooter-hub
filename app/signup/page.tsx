@@ -1,43 +1,63 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [dominantEye, setDominantEye] = useState<"left" | "right" | "">("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      name,
-      email,
-      password,
-      callbackUrl,
-    });
-
-    setLoading(false);
-
-    if (!res || res.error) {
-      setError(res?.error || "Login failed");
+    if (!name || !email || !password) {
+      setError("All fields are required");
       return;
     }
 
-    router.push(res.url || "/dashboard");
-  }
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          dominantEye: dominantEye || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.error || "Signup failed");
+        return;
+      }
+
+      setSuccess(true);
+
+      // Optional: redirect to login after signup
+      setTimeout(() => {
+        router.push("/login");
+      }, 1200);
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main
@@ -85,19 +105,18 @@ export default function LoginPage() {
               marginBottom: "0.25rem",
             }}
           >
-            Login to Shooter Hub
+            Signup to Shooter Hub
           </h1>
           <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
-            Use your email and a password. New shooters will be created on first
-            login.
+            Create your account to start using Shooter Hub
           </p>
         </header>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={onSubmit}
           style={{ display: "grid", gap: "1rem", marginBottom: "0.5rem" }}
         >
-          {/* <div style={{ display: "grid", gap: "0.3rem" }}>
+          <div style={{ display: "grid", gap: "0.3rem" }}>
             <label style={{ fontSize: "0.85rem" }}>Full Name</label>
             <input
               type="text"
@@ -115,7 +134,7 @@ export default function LoginPage() {
                 outline: "none",
               }}
             />
-          </div> */}
+          </div>
 
           <div style={{ display: "grid", gap: "0.3rem" }}>
             <label style={{ fontSize: "0.85rem" }}>Email</label>
@@ -157,6 +176,32 @@ export default function LoginPage() {
             />
           </div>
 
+          <div style={{ display: "grid", gap: "0.3rem" }}>
+            <label style={{ fontSize: "0.85rem" }}>Dominant Eye (optional)</label>
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+              {["left", "right"].map((eye) => (
+                <button
+                  type="button"
+                  key={eye}
+                  onClick={() => setDominantEye(eye as "left" | "right")}
+                  style={{
+                    flex: 1,
+                    padding: "0.6rem 0.75rem",
+                    borderRadius: "0.75rem",
+                    border: "1px solid rgba(148,163,184,0.7)",
+                    backgroundColor: dominantEye === eye ? "rgba(15,23,42,0.85)" : "rgba(15,23,42,0.5)",
+                    color: "white",
+                    fontSize: "0.9rem",
+                    outline: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  {eye.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -175,13 +220,19 @@ export default function LoginPage() {
               boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
             }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
 
         {error && (
           <p style={{ color: "#fecaca", fontSize: "0.8rem", marginTop: "0.5rem" }}>
             {error}
+          </p>
+        )}
+
+        {success && (
+          <p style={{ color: "#d1fae5", fontSize: "0.8rem", marginTop: "0.5rem" }}>
+            Account created successfully. Redirecting…
           </p>
         )}
 
@@ -192,7 +243,7 @@ export default function LoginPage() {
             color: "#9ca3af",
           }}
         >
-          First time? <Link href="/signup" style={{ color: "#a5b4fc" }}>Signup here.</Link>
+          Already have an account? <Link href="/login" style={{ color: "#a5b4fc" }}>Login here.</Link>
         </p>
       </div>
     </main>
