@@ -6,13 +6,13 @@ import { Shot } from "@/models/Shot";
 import { scoreShot } from "@/lib/scoring";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // POST /api/session/:id/shot
 export async function POST(req: NextRequest, { params }: RouteParams) {
   await connectDB();
-  const { id } = params;
+  const { id } = await params;
   const body = await req.json();
 
   const session = await Session.findById(id);

@@ -5,12 +5,12 @@ import { Session } from "@/models/Session";
 import { Shot } from "@/models/Shot";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
   await connectDB();
-  const { id } = params;
+  const { id } = await params;
 
   const session = await Session.findById(id).lean();
   if (!session) {

@@ -2,18 +2,19 @@
 
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
-export default function ExperiencePage() {
+function ExperienceContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
-  const gameId = '123';searchParams.get("gameId");
+//   const gameId = searchParams.get("gameId");
+  const gameId = "691c09f80db2cdf1dd52bae1";
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
-  const EXPERINCE_URL = "https://app.zimension3d.com/#/world/691c09f80db2cdf1dd52bae1"
+  const EXPERINCE_URL = "https://app.zimension3d.com/#/world/"
 
   useEffect(() => {
     if (status === "loading") return;
-    let token = ''//session?.user.id
+    let token =  'sadasdasdas';
     // if (!session?.accessToken) {
     //   // Redirect to login or show error
     //   return;
@@ -25,7 +26,7 @@ export default function ExperiencePage() {
     }
 
     // Assuming the iframe URL is something like this - adjust as needed
-    const src = `${EXPERINCE_URL}?token=${token}&gameId=${gameId}`;
+    const src = `${EXPERINCE_URL}/${gameId}?token=${token}`;
     setIframeSrc(src);
   }, [session, status, gameId]);
 
@@ -57,5 +58,13 @@ export default function ExperiencePage() {
         title="Game Experience"
       />
     </div>
+  );
+}
+
+export default function ExperiencePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ExperienceContent />
+    </Suspense>
   );
 }

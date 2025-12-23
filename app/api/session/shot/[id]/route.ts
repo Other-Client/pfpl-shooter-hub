@@ -5,13 +5,13 @@ import { Session } from "@/models/Session";
 import { Shot } from "@/models/Shot";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // GET /api/session/:id -> full session details + shots
 export async function GET(req: NextRequest, { params }: RouteParams) {
   await connectDB();
-  const { id } = params;
+  const { id } = await params;
 
   const session = await Session.findById(id).lean();
   if (!session) {
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 // PATCH /api/session/:id -> finish session with summary + artifacts
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
   await connectDB();
-  const { id } = params;
+  const { id } = await params;
   const body = await req.json();
 
   const { summary, heatmapUrl, targetSnapshotUrl } = body;
