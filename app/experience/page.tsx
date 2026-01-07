@@ -41,7 +41,7 @@ function ExperienceContent() {
 
     // Assuming the iframe URL is something like this - adjust as needed
     const src = rawToken
-      ? `${EXPERINCE_URL}/${gameId}?apptoken=${rawToken}`
+      ? `${EXPERINCE_URL}/${gameId}?appauth=${rawToken}`
       : `${EXPERINCE_URL}/${gameId}`;
     console.log("Iframe src:", src)
     setIframeSrc(src);

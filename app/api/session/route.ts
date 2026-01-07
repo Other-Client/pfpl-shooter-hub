@@ -3,35 +3,48 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { Shooter } from "@/models/Shooter";
+import { requireAuth } from "@/lib/jwt";
+
+const DEFAULT_GUN_PRESET = "10m_pistol";
+const DEFAULT_TARGET_TYPE = "10m_standard";
 
 // POST /api/session -> start new session
 export async function POST(req: NextRequest) {
-  await connectDB();
-  const body = await req.json();
+  try {
+    const decoded = await requireAuth(req);
+    await connectDB();
+    const body = await req.json();
 
-  const { shooterId, gunPreset, targetType, settings } = body;
+    const shooterId =
+      (decoded as any)?.userId ?? (decoded as any)?.sub ?? (decoded as any)?.id;
+    if (!shooterId) {
+      return NextResponse.json({ error: "Invalid token payload" }, { status: 401 });
+    }
 
-  if (!shooterId || !gunPreset || !targetType) {
-    return NextResponse.json(
-      { error: "shooterId, gunPreset, targetType are required" },
-      { status: 400 }
-    );
+    const gunPreset = body.gunPreset ?? DEFAULT_GUN_PRESET;
+    const targetType = body.targetType ?? DEFAULT_TARGET_TYPE;
+    const settings = body.settings || {};
+
+    const shooter = await Shooter.findById(shooterId);
+    if (!shooter) {
+      return NextResponse.json({ error: "Shooter not found" }, { status: 404 });
+    }
+
+    const session = await Session.create({
+      shooterId,
+      gunPreset,
+      targetType,
+      settings,
+      startedAt: new Date(),
+    });
+
+    return NextResponse.json(session);
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  const shooter = await Shooter.findById(shooterId);
-  if (!shooter) {
-    return NextResponse.json({ error: "Shooter not found" }, { status: 404 });
-  }
-
-  const session = await Session.create({
-    shooterId,
-    gunPreset,
-    targetType,
-    settings: settings || {},
-    startedAt: new Date(),
-  });
-
-  return NextResponse.json(session);
 }
 
 // GET /api/session?shooterId=... -> list sessions for a shooter

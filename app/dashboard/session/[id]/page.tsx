@@ -72,6 +72,7 @@ export default async function SessionDetailPage(props: PageProps) {
     const d = Math.sqrt(dx * dx + dy * dy);
     if (d > maxDist) maxDist = d;
   });
+  const referenceTime = new Date(s.startedAt).getTime()
 
   return (
     <main
@@ -289,7 +290,7 @@ export default async function SessionDetailPage(props: PageProps) {
                   {shots.map((sh: any, idx: number) => (
                     <tr key={sh._id} style={{ borderTop: "1px solid rgba(30,64,175,0.4)" }}>
                       <td style={{ padding: "0.55rem 0.9rem" }}>{idx + 1}</td>
-                      <td style={{ padding: "0.55rem 0.9rem" }}>{sh.tsMs}</td>
+                      <td style={{ padding: "0.55rem 0.9rem" }}>{Math.floor((sh.tsMs - referenceTime) / 100)/10}</td>
                       <td style={{ padding: "0.55rem 0.9rem" }}>
                         {sh.xMm.toFixed(1)}
                       </td>

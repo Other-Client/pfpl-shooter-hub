@@ -4,6 +4,24 @@ import { connectDB } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { requireAuth } from "@/lib/jwt";
 
+const ALLOWED_ORIGIN = process.env.CORS_ALLOWED_ORIGIN || "https://app.zimension3d.com";
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Credentials": "true",
+};
+
+const withCors = (res: NextResponse) => {
+  Object.entries(corsHeaders).forEach(([key, value]) => res.headers.set(key, value));
+  res.headers.append("Vary", "Origin");
+  return res;
+};
+
+export async function OPTIONS() {
+  return withCors(new NextResponse(null, { status: 204 }));
+}
+
 export async function GET(req: NextRequest) {
   try {
     await requireAuth(req);
@@ -23,11 +41,11 @@ export async function GET(req: NextRequest) {
       .lean()
       .limit(500);
 
-    return NextResponse.json(sessions);
+    return withCors(NextResponse.json(sessions));
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return withCors(NextResponse.json({ error: "Unauthorized" }, { status: 401 }));
     }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return withCors(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
   }
 }
