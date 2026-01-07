@@ -1,12 +1,18 @@
-import type { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { connectDB } from "@/lib/db";
 import { Shooter } from "@/models/Shooter";
 
+// Define a custom user type to avoid 'any'
+interface CustomUser extends User {
+  id: string;
+  role: string;
+}
+
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // Correct: This triggers the JWT workflow
   },
   pages: {
     signIn: "/login",
@@ -20,62 +26,56 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
-          return null;
-        }
-
-        const email = String(credentials.email).trim().toLowerCase();
-        const name = String(credentials.name || "").trim();
-        const password = credentials.password;
+        if (!credentials?.email || !credentials.password) return null;
 
         await connectDB();
-
+        const email = credentials.email.toLowerCase();
         let shooter = await Shooter.findOne({ email });
 
         if (!shooter) {
-          if (!name) {
-            // Require name for first-time signup
-            throw new Error("Please provide your name to create an account.");
-          }
-
-          const hash = await bcrypt.hash(password, 10);
+          if (!credentials.name) throw new Error("Name required for signup");
+          
+          const hash = await bcrypt.hash(credentials.password, 10);
           shooter = await Shooter.create({
-            name,
+            name: credentials.name,
             email,
             passwordHash: hash,
             role: "shooter",
           });
         } else {
-          const isValid = await bcrypt.compare(password, shooter.passwordHash);
-          if (!isValid) {
-            throw new Error("Invalid email or password.");
-          }
+          const isValid = await bcrypt.compare(credentials.password, shooter.passwordHash);
+          if (!isValid) throw new Error("Invalid credentials");
         }
 
+        // Return object must match the CustomUser interface
         return {
           id: shooter._id.toString(),
           name: shooter.name,
           email: shooter.email,
           role: shooter.role,
-        };
+        } as CustomUser;
       },
     }),
   ],
   callbacks: {
+    // 1. Initial login: 'user' is what you returned from authorize()
+    // 2. Subsequent requests: 'user' is undefined, but 'token' persists
     async jwt({ token, user }) {
       if (user) {
-        token.userId = (user as any).id;
-        token.role = (user as any).role;
+        token.id = (user as CustomUser).id;
+        token.role = (user as CustomUser).role;
       }
       return token;
     },
+    // This passes data from the JWT to the frontend session
     async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as any).id = token.userId;
+      if (session.user) {
+        (session.user as any).id = token.id;
         (session.user as any).role = token.role;
-        (session as any).accessToken = token;
       }
       return session;
     },
   },
+  // Recommended: Secret is required for production JWT signing
+  secret: process.env.NEXTAUTH_SECRET,
 };

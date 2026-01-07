@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -21,22 +20,27 @@ function LoginContent() {
     setError(null);
     setLoading(true);
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      name,
-      email,
-      password,
-      callbackUrl,
-    });
+    try {
+      const r = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    setLoading(false);
+      const data = await r.json();
+      setLoading(false);
 
-    if (!res || res.error) {
-      setError(res?.error || "Login failed");
-      return;
+      if (!r.ok) {
+        setError(data?.error || "Login failed");
+        return;
+      }
+
+      // server sets httpOnly cookie 'authToken' — just redirect
+      router.push(callbackUrl || "/dashboard");
+    } catch (err) {
+      setLoading(false);
+      setError((err as Error).message || "Login failed");
     }
-
-    router.push(res.url || "/dashboard");
   }
 
   return (

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { Shot } from "@/models/Shot";
@@ -18,15 +18,24 @@ export default async function SessionDetailPage(props: PageProps) {
   // 🔑 unwrap params once
   const { id: sessionId } = await props.params;
 
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user || !(session.user as any).id) {
+  const cookiesData = await cookies();
+  const token = cookiesData.get("authToken")?.value;
+  if (!token || !process.env.JWT_SECRET) {
     // use the resolved sessionId here, NOT params.id
     redirect(`/login?callbackUrl=/dashboard/session/${sessionId}`);
   }
 
-  const shooterId = (session.user as any).id;
-  // const sessionId = await params.id;
+  let shooterId: string | null = null;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
+    shooterId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
+  } catch {
+    shooterId = null;
+  }
+
+  if (!shooterId) {
+    redirect(`/login?callbackUrl=/dashboard/session/${sessionId}`);
+  }
 
   await connectDB();
 

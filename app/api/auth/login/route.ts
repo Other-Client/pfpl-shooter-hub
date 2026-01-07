@@ -42,10 +42,17 @@ export async function POST(req: NextRequest) {
   }
 
   const token = jwt.sign(
-    { sub: shooter._id.toString(), email: shooter.email, name: shooter.name },
+    {
+      sub: shooter._id.toString(),
+      userId: shooter._id.toString(),
+      email: shooter.email,
+      name: shooter.name,
+    },
     JWT_SECRET,
     { expiresIn: "30d" }
   );
+  console.log('hi')
+  console.log('login token', token);
 
   const res = NextResponse.json({
     shooterId: shooter._id.toString(),
