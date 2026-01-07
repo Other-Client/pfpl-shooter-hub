@@ -68,7 +68,7 @@ function ExperienceContent() {
       <iframe
         src={iframeSrc}
         allow={"xr-spatial-tracking; fullscreen"}
-        sandbox="allow-scripts allow-same-origin allow-forms"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
         style={{
           width: "100%",
           height: "100%",
