@@ -67,6 +67,8 @@ function ExperienceContent() {
     <div style={{ width: "100vw", height: "100vh" }}>
       <iframe
         src={iframeSrc}
+        allow={"xr-spatial-tracking; fullscreen"}
+        sandbox="allow-scripts allow-same-origin allow-forms"
         style={{
           width: "100%",
           height: "100%",

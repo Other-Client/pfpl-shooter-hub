@@ -9,6 +9,14 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Credentials": "true",
 };
 
+const WEBXR_ALLOWED_ORIGINS = (process.env.WEBXR_ALLOWED_ORIGINS || "self")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean)
+  .map((o) => (o === "self" ? "self" : `"${o}"`))
+  .join(" ");
+const WEBXR_PERMISSIONS_POLICY = `xr-spatial-tracking=(${WEBXR_ALLOWED_ORIGINS || "self"})`;
+
 const applyCorsHeaders = (res: NextResponse, isApiRoute: boolean) => {
   if (!isApiRoute) return res;
 
@@ -17,18 +25,26 @@ const applyCorsHeaders = (res: NextResponse, isApiRoute: boolean) => {
   return res;
 };
 
+const applyWebXRHeaders = (res: NextResponse) => {
+  res.headers.set("Permissions-Policy", WEBXR_PERMISSIONS_POLICY);
+  return res;
+};
+
+const finalizeResponse = (res: NextResponse, isApiRoute: boolean) =>
+  applyWebXRHeaders(applyCorsHeaders(res, isApiRoute));
+
 export default function middleware(req: NextRequest) {
   const isApiRoute = req.nextUrl.pathname.startsWith("/api/");
   const token = req.cookies.get("authToken")?.value;
   const authHeader = req.headers.get("authorization");
 
   if (req.method === "OPTIONS" && isApiRoute) {
-    return applyCorsHeaders(new NextResponse(null, { status: 204 }), isApiRoute);
+    return finalizeResponse(new NextResponse(null, { status: 204 }), isApiRoute);
   }
 
   // Allow API requests that present a Bearer token to reach route handlers for validation
   if (isApiRoute && authHeader?.startsWith("Bearer ")) {
-    return applyCorsHeaders(NextResponse.next(), isApiRoute);
+    return finalizeResponse(NextResponse.next(), isApiRoute);
   }
 
   if (!token) {
@@ -37,11 +53,11 @@ export default function middleware(req: NextRequest) {
     url.searchParams.set("callbackUrl", req.nextUrl.pathname);
 
     if (isApiRoute) {
-      return applyCorsHeaders(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), isApiRoute);
+      return finalizeResponse(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), isApiRoute);
     }
-    return NextResponse.redirect(url);
+    return finalizeResponse(NextResponse.redirect(url), isApiRoute);
   }
-  return applyCorsHeaders(NextResponse.next(), isApiRoute);
+  return finalizeResponse(NextResponse.next(), isApiRoute);
 }
 
 export const config = {
