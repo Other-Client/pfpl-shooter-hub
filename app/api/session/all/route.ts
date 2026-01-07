@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { requireAuth } from "@/lib/jwt";
 
-const ALLOWED_ORIGIN = process.env.CORS_ALLOWED_ORIGIN || "https://app.zimension3d.com";
+const ALLOWED_ORIGIN = process.env.CORS_ALLOWED_ORIGIN || "*";
 const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
   "Access-Control-Allow-Methods": "GET,OPTIONS",
