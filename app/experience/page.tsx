@@ -11,7 +11,7 @@ function ExperienceContent() {
   const gameId = "691c09f80db2cdf1dd52bae1";
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [rawToken, setRawToken] = useState<string | null>(null);
-  const EXPERINCE_URL = "https://app.zimension3d.com/#/world"
+  const EXPERINCE_URL = "https://app.zimension3d.com/#/world-guest"
 
   useEffect(() => {
     if (status === "loading") return;
