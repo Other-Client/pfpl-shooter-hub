@@ -62,7 +62,7 @@ function ExperienceContent() {
     // postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
     setTimeout(() => {
       postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
-      // console.log('new iframe message posted',rawToken)
+      console.log('new iframe message posted',rawToken)
     },8000)
   }, [rawToken]);
 
