@@ -60,10 +60,18 @@ function ExperienceContent() {
     // console.log("Raw token:", rawToken);
     if(!rawToken) return
     // postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
-    setTimeout(() => {
-      postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
-      console.log('new iframe message posted',rawToken)
-    },8000)
+    const onMessage = (event: MessageEvent) => {
+      // Safety checks: origin and source
+      // if (event.origin !== IFRAME_ORIGIN) return;
+      // if (event.source !== iframeRef.current?.contentWindow) return;
+
+      // Respond to the iframe asking for auth
+      if (event.data?.type === "REQUEST_AUTH") {
+        postMessageToIframe({ type: "AUTH_TOKEN", token: rawToken });
+      }
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
   }, [rawToken]);
 
   if (status === "loading") {
