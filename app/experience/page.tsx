@@ -25,7 +25,7 @@ function ExperienceContent() {
         if (response.ok) {
           const data = await response.json();
           setRawToken(data.token);
-          console.log("Raw JWT Token:", data.token);
+          // console.log("Raw JWT Token:", data.token);
         } else {
           console.error("Failed to fetch token");
         }
@@ -45,7 +45,7 @@ function ExperienceContent() {
     const src = rawToken
       ? `${EXPERINCE_URL}/${gameId}?appauth=${rawToken}`
       : `${EXPERINCE_URL}/${gameId}`;
-    console.log("Iframe src:", src)
+    // console.log("Iframe src:", src)
     setIframeSrc(src);
     
   }, [session, status, gameId, rawToken]);
@@ -57,12 +57,12 @@ function ExperienceContent() {
 
   useEffect(() => {
     
-    console.log("Raw token:", rawToken);
+    // console.log("Raw token:", rawToken);
     if(!rawToken) return
     // postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
     setTimeout(() => {
       postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
-      console.log('new iframe message posted',rawToken)
+      // console.log('new iframe message posted',rawToken)
     },8000)
   }, [rawToken]);
 
@@ -91,7 +91,7 @@ function ExperienceContent() {
         ref={iframeRef}
         src={iframeSrc}
         allow={"xr-spatial-tracking; fullscreen"}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock pointer-lock allow-popups allow-modals allow-orientation-lock allow-presentation gamepad fullscreen allow-top-navigation-by-user-activation"
         style={{
           width: "100%",
           height: "100%",
