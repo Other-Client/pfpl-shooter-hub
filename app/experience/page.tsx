@@ -2,17 +2,19 @@
 
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 
 function ExperienceContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
 //   const gameId = searchParams.get("gameId");
   const gameId = "691c09f80db2cdf1dd52bae1";
+  // const gameId = "6965c0278217c54420eb6363";
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [rawToken, setRawToken] = useState<string | null>(null);
   const EXPERINCE_URL = "https://app.zimension3d.com/#/world-guest"
 
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   useEffect(() => {
     if (status === "loading") return;
 
@@ -45,11 +47,31 @@ function ExperienceContent() {
       : `${EXPERINCE_URL}/${gameId}`;
     console.log("Iframe src:", src)
     setIframeSrc(src);
+    
   }, [session, status, gameId, rawToken]);
+  function postMessageToIframe (message: any) {
+    const iframe = iframeRef.current;
+    if(iframe)
+    iframe.contentWindow?.postMessage(message, "*");
+  };
+
+  useEffect(() => {
+    
+    console.log("Raw token:", rawToken);
+    if(!rawToken) return
+    // postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
+    setTimeout(() => {
+      postMessageToIframe({ type: "IFRAME_QUERY", auth: rawToken })
+      console.log('new iframe message posted',rawToken)
+    },8000)
+  }, [rawToken]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
   }
+  
+
+
 
 //   if (!session) {
 //     return <div>Please log in to access the experience.</div>;
@@ -66,6 +88,7 @@ function ExperienceContent() {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <iframe
+        ref={iframeRef}
         src={iframeSrc}
         allow={"xr-spatial-tracking; fullscreen"}
         sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
