@@ -66,7 +66,9 @@ function ExperienceContent() {
       // if (event.source !== iframeRef.current?.contentWindow) return;
 
       // Respond to the iframe asking for auth
+      console.log("new messsge", event.data)
       if (event.data?.type === "REQUEST_AUTH") {
+        // console.log('sending token',rawToken)
         postMessageToIframe({ type: "AUTH_TOKEN", token: rawToken });
       }
     }
