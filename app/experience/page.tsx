@@ -88,17 +88,14 @@ function ExperienceContent() {
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <iframe
-        ref={iframeRef}
-        src={iframeSrc}
-        allow={"xr-spatial-tracking; fullscreen gamepad fullscreen pointer-lock "}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-presentation  allow-top-navigation-by-user-activation"
-        style={{
-          width: "100%",
-          height: "100%",
-          border: "none",
-        }}
-        title="Game Experience"
-      />
+  ref={iframeRef}
+  src={iframeSrc}
+  allow="xr-spatial-tracking; autoplay; fullscreen; gamepad; pointer-lock"
+  allowFullScreen
+  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-modals allow-orientation-lock allow-presentation allow-top-navigation-by-user-activation"
+  style={{ width: "100%", height: "100%", border: "none" }}
+  title="Game Experience"
+/>
     </div>
   );
 }

@@ -62,8 +62,6 @@ export default function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/experience/:path*",
     "/api/session/:path*",
     "/api/shooter/:path*",
   ],
