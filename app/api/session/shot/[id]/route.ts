@@ -82,7 +82,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       | Array<{ sessionId: unknown; index: number; tsMs: number; xMm: number; yMm: number; score: number; ring: number; isInnerTen: boolean }>
       | null = null;
 
-    if (Array.isArray(shots) && shots.length) {
+    if (Array.isArray(shots) && shots.length && false) {
       // Replace existing shots with the provided final list to avoid duplicates or partial saves.
       await Shot.deleteMany({ sessionId: id });
 
@@ -106,7 +106,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       });
 
       insertedShots = await Shot.insertMany(shotDocs);
+    }else {
+  // reuse shots already in DB
+      insertedShots = await Shot.find({ sessionId: id }).sort({ index: 1 }).lean();
     }
+    console.log('inserted shots',insertedShots)
 
     const computedSummary = insertedShots ? computeSummary(insertedShots) : null;
     const nextSummary =

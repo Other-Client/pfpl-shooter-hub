@@ -43,6 +43,7 @@ export default async function SessionDetailPage(props: PageProps) {
   if (!s) {
     redirect("/dashboard");
   }
+  console.log('session',s)
 
   const shots = await Shot.find({ sessionId })
     .sort({ index: 1 })
@@ -73,6 +74,11 @@ export default async function SessionDetailPage(props: PageProps) {
     if (d > maxDist) maxDist = d;
   });
   const referenceTime = new Date(s.startedAt).getTime()
+  const startedAtIst = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(s.startedAt));
 
   return (
     <main
@@ -104,7 +110,7 @@ export default async function SessionDetailPage(props: PageProps) {
             Session details
           </h1>
           <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
-            {new Date(s.startedAt).toLocaleString()} • {s.gunPreset} •{" "}
+            {startedAtIst} • {s.gunPreset} •{" "}
             {s.targetType}
           </p>
         </header>
