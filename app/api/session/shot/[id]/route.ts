@@ -84,28 +84,28 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     if (Array.isArray(shots) && shots.length && false) {
       // Replace existing shots with the provided final list to avoid duplicates or partial saves.
-      await Shot.deleteMany({ sessionId: id });
+      // await Shot.deleteMany({ sessionId: id });
 
-      const shotDocs = shots.map((s, idx) => {
-        const { tsMs, xMm, yMm } = s ?? {};
-        if (tsMs == null || xMm == null || yMm == null) {
-          throw new Error("Each shot requires tsMs, xMm, and yMm");
-        }
+      // const shotDocs = shots.map((s, idx) => {
+      //   const { tsMs, xMm, yMm } = s ?? {};
+      //   if (tsMs == null || xMm == null || yMm == null) {
+      //     throw new Error("Each shot requires tsMs, xMm, and yMm");
+      //   }
 
-        const scored = scoreShot({ xMm, yMm });
-        return {
-          sessionId: session._id,
-          index: idx,
-          tsMs,
-          xMm,
-          yMm,
-          score: scored.score,
-          ring: scored.ring,
-          isInnerTen: scored.isInnerTen,
-        };
-      });
+      //   const scored = scoreShot({ xMm, yMm });
+      //   return {
+      //     sessionId: session._id,
+      //     index: idx,
+      //     tsMs,
+      //     xMm,
+      //     yMm,
+      //     score: scored.score,
+      //     ring: scored.ring,
+      //     isInnerTen: scored.isInnerTen,
+      //   };
+      // });
 
-      insertedShots = await Shot.insertMany(shotDocs);
+      // insertedShots = await Shot.insertMany(shotDocs);
     }else {
   // reuse shots already in DB
       insertedShots = await Shot.find({ sessionId: id }).sort({ index: 1 }).lean();
