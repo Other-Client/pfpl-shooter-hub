@@ -1,4 +1,4 @@
-// app/layout.tsx
+﻿// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
@@ -15,9 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PreciShot – VR Sports Shooting Simulator",
+  title: "PreciShot - VR Sports Shooting Simulator",
   description:
     "PreciShot is the VR training and analytics platform by Precihole Sports Foundation for shooters and coaches.",
+  applicationName: "PreciShot",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -35,3 +40,4 @@ export default function RootLayout({
     </html>
   );
 }
+

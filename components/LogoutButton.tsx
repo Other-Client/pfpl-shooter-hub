@@ -1,11 +1,21 @@
 "use client";
 import React from "react";
-import { signOut } from "next-auth/react";
 
-export default function LogoutButton() {
+type Props = {
+  styleOverride?: React.CSSProperties;
+};
+
+export default function LogoutButton({ styleOverride }: Props) {
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "/login" })}
+      onClick={async () => {
+        try {
+          await fetch("/api/auth/logout", { method: "POST" });
+        } catch {
+          /* ignore network errors */
+        }
+        if (typeof window !== "undefined") window.location.href = "/login";
+      }}
       style={{
         padding: "0.9rem 1.5rem",
         background: "linear-gradient(135deg, #ef4444, #b91c1c)",
@@ -16,6 +26,7 @@ export default function LogoutButton() {
         fontWeight: 600,
         cursor: "pointer",
         marginLeft: "0.75rem",
+        ...(styleOverride || {}),
       }}
       title="Sign out"
     >

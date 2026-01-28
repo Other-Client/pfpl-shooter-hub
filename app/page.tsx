@@ -1,7 +1,19 @@
 // src/app/page.tsx
-import Link from "next/link";
+export const dynamic = "force-dynamic";
 
-export default function Home() {
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { BrandMark } from "@/components/BrandMark";
+
+export default async function Home() {
+  // If already authenticated, go straight to dashboard
+  const cookieStore = await cookies();
+  const token = cookieStore.get("authToken")?.value;
+  const isAuthed = Boolean(token);
+  if (isAuthed) {
+    redirect("/dashboard");
+  }
   return (
     <main
       style={{
@@ -26,55 +38,40 @@ export default function Home() {
           background: "rgba(15, 23, 42, 0.75)",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span
-            style={{
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.15em",
-              color: "#9ca3af",
-            }}
-          >
-            Company
-          </span>
-          <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
-            Precihole Sports Foundation
-          </span>
-        </div>
+        <BrandMark subtitle="Platform" href="/dashboard" />
 
-        <nav style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-          <span style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
-            Platform:
-          </span>
-          <span
-            style={{
-              fontSize: "1rem",
-              fontWeight: 600,
-              padding: "0.25rem 0.75rem",
-              borderRadius: "999px",
-              border: "1px solid rgba(148, 163, 184, 0.5)",
-              background: "rgba(15,23,42,0.9)",
-            }}
-          >
-            PreciShot
-          </span>
-
+        <nav style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          {!isAuthed && (
+            <Link
+              href="/login"
+              style={{
+                padding: "0.55rem 1.25rem",
+                borderRadius: "999px",
+                border: "1px solid transparent",
+                background: "linear-gradient(135deg, #f97316, #eab308, #22c55e)",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                color: "black",
+                textDecoration: "none",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              }}
+            >
+              Login
+            </Link>
+          )}
           <Link
-            href="/login"
+            href="/dashboard"
             style={{
-              padding: "0.55rem 1.25rem",
+              padding: "0.55rem 1.1rem",
               borderRadius: "999px",
-              border: "1px solid transparent",
-              background:
-                "linear-gradient(135deg, #f97316, #eab308, #22c55e)",
-              fontSize: "0.9rem",
-              fontWeight: 600,
-              color: "black",
+              border: "1px solid rgba(148,163,184,0.5)",
+              color: "#e5e7eb",
               textDecoration: "none",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+              background: "rgba(15,23,42,0.8)",
+              fontSize: "0.9rem",
             }}
           >
-            Login
+            Dashboard
           </Link>
         </nav>
       </header>

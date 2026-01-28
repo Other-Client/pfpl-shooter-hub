@@ -4,10 +4,11 @@ import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/db";
 import { Session } from "@/models/Session";
 import { Shot } from "@/models/Shot";
-import { CreateDummySessionButton } from "@/components/CreateDummySession";
 import Link from "next/link";
 import LogToken from "@/components/LogToken";
 import LogoutButton from "@/components/LogoutButton";
+import { BrandMark } from "@/components/BrandMark";
+import { AccountMenu } from "@/components/AccountMenu";
 
 export default async function DashboardPage() {
   let cookiesData = await cookies();
@@ -57,25 +58,28 @@ export default async function DashboardPage() {
     >
       <LogToken />
       <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
-        <header style={{ marginBottom: "2rem" }}>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.25em",
-              color: "#9ca3af",
-              marginBottom: "0.25rem",
-            }}
-          >
-            PreciShot Dashboard
-          </p>
-          <h1 style={{ fontSize: "2rem", fontWeight: 700 }}>
+        <header
+          style={{
+            marginBottom: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <BrandMark showSubtitle={false} href="/dashboard" />
+          <AccountMenu />
+        </header>
+
+        <div style={{ marginBottom: "1.25rem" }}>
+          <h1 style={{ fontSize: "2rem", fontWeight: 700, margin: 0 }}>
             Welcome{shooterName ? `, ${shooterName}` : ""}
           </h1>
-          <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
+          <p style={{ fontSize: "0.9rem", color: "#e5e7eb", marginTop: "0.35rem" }}>
             Review your VR training sessions, scores and shot patterns.
           </p>
-        </header>
+        </div>
 
         {/* Summary cards */}
         <section
@@ -122,11 +126,8 @@ export default async function DashboardPage() {
               🚀 Start VR Experience
             </button>
           </Link>
-          <LogoutButton />
         </div>
-        <div style={{ marginBottom: "1.5rem" }}>
-          <CreateDummySessionButton />
-        </div>
+        {/* CreateDummySessionButton intentionally hidden */}
 
         {/* Recent sessions list */}
         <section>

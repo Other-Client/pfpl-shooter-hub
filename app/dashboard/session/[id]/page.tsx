@@ -6,6 +6,8 @@ import { Session } from "@/models/Session";
 import { Shot } from "@/models/Shot";
 import { ShotHeatmapCard } from "@/components/ShotHeatmapCard";
 import { SessionDownloads } from "@/components/SessionDownloads";
+import { BrandMark } from "@/components/BrandMark";
+import { BackLink } from "@/components/BackLink";
 
 type SessionRouteParams = { id: string };
 
@@ -113,17 +115,10 @@ export default async function SessionDetailPage(props: PageProps) {
       }}
     >
       <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
-        <a
-          href="/dashboard"
-          style={{
-            fontSize: "0.8rem",
-            color: "#9ca3af",
-            textDecoration: "underline",
-            textUnderlineOffset: "2px",
-          }}
-        >
-          &larr; Back to dashboard
-        </a>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem", flexWrap: "wrap" }}>
+          <BackLink href="/dashboard" />
+          <BrandMark subtitle="Session" href="/dashboard" />
+        </div>
 
         <header style={{ margin: "1rem 0 1.5rem" }}>
           <h1 style={{ fontSize: "1.8rem", fontWeight: 700 }}>Session details</h1>
