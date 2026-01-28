@@ -16,6 +16,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   if (!session) {
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
+  console.log('sessionData',session)
 
   const shots = await Shot.find({ sessionId: id }).sort({ index: 1 }).lean();
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, forwardRef, MutableRefObject } from "react";
 
 export interface Shot {
   xMm: number;
@@ -12,7 +12,10 @@ interface Props {
   size?: number; // canvas size in px
 }
 
-export function ShotHeatmap({ shots, size = 260 }: Props) {
+export const ShotHeatmap = forwardRef<HTMLCanvasElement, Props>(function ShotHeatmap(
+  { shots, size = 260 }: Props,
+  forwardedRef
+) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -83,7 +86,14 @@ export function ShotHeatmap({ shots, size = 260 }: Props) {
 
   return (
     <canvas
-      ref={canvasRef}
+      ref={(node) => {
+        canvasRef.current = node;
+        if (typeof forwardedRef === "function") {
+          forwardedRef(node);
+        } else if (forwardedRef) {
+          (forwardedRef as MutableRefObject<HTMLCanvasElement | null>).current = node;
+        }
+      }}
       width={size}
       height={size}
       style={{
@@ -95,4 +105,4 @@ export function ShotHeatmap({ shots, size = 260 }: Props) {
       }}
     />
   );
-}
+});

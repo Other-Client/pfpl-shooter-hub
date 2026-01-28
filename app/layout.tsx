@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shooter Hub – Precihole Sports Foundation",
+  title: "PreciShot – VR Sports Shooting Simulator",
   description:
-    "Shooter Hub is the VR training and analytics platform by Precihole Sports Foundation for shooters and coaches.",
+    "PreciShot is the VR training and analytics platform by Precihole Sports Foundation for shooters and coaches.",
 };
 
 export default function RootLayout({

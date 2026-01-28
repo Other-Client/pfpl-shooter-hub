@@ -105,10 +105,10 @@ export default function SignupPage() {
               marginBottom: "0.25rem",
             }}
           >
-            Signup to Shooter Hub
+            Signup to PreciShot
           </h1>
           <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
-            Create your account to start using Shooter Hub
+            Create your account to start using PreciShot
           </p>
         </header>
 

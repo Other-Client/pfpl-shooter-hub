@@ -89,7 +89,7 @@ function LoginContent() {
               marginBottom: "0.25rem",
             }}
           >
-            Login to Shooter Hub
+            Login to PreciShot
           </h1>
           <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
             Use your email and a password. New shooters will be created on first

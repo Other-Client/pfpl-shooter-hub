@@ -56,7 +56,7 @@ export default function Home() {
               background: "rgba(15,23,42,0.9)",
             }}
           >
-            Shooter Hub
+            PreciShot
           </span>
 
           <Link
@@ -114,7 +114,7 @@ export default function Home() {
               marginBottom: "1rem",
             }}
           >
-            Shooter Hub:  
+            PreciShot:  
             <span style={{ color: "#f97316" }}> Train, Track</span> &{" "}
             <span style={{ color: "#22c55e" }}>Transform</span> Every Shot.
           </h1>
@@ -127,7 +127,7 @@ export default function Home() {
               marginBottom: "1.5rem",
             }}
           >
-            Shooter Hub is the official performance companion by{" "}
+            PreciShot is the official performance companion by{" "}
             <strong>Precihole Sports Foundation</strong> – connecting your VR
             shooting range to detailed analytics. Every session, every shot,
             every tiny improvement is captured and visualised in one place.
@@ -164,7 +164,7 @@ export default function Home() {
                 boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
               }}
             >
-              Login to Shooter Hub
+              Login to PreciShot
             </Link>
 
             <span style={{ fontSize: "0.85rem", color: "#9ca3af" }}>
@@ -191,7 +191,7 @@ export default function Home() {
               marginBottom: "1rem",
             }}
           >
-            How Shooter Hub fits your range:
+            How PreciShot fits your range:
           </h2>
 
           <ol
@@ -204,7 +204,7 @@ export default function Home() {
             }}
           >
             <li>
-              <strong>Log in</strong> to your Shooter Hub account.
+              <strong>Log in</strong> to your PreciShot account.
             </li>
             <li>
               <strong>Start a session</strong> in the VR shooting range –
@@ -242,7 +242,7 @@ export default function Home() {
             >
               Login now
             </Link>{" "}
-            to access your Shooter Hub dashboard.
+            to access your PreciShot dashboard.
           </div>
         </div>
       </section>

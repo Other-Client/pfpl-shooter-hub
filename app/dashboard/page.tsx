@@ -67,7 +67,7 @@ export default async function DashboardPage() {
               marginBottom: "0.25rem",
             }}
           >
-            Shooter Hub Dashboard
+            PreciShot Dashboard
           </p>
           <h1 style={{ fontSize: "2rem", fontWeight: 700 }}>
             Welcome{shooterName ? `, ${shooterName}` : ""}
