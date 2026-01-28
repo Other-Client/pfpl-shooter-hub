@@ -20,8 +20,9 @@ export const metadata: Metadata = {
     "PreciShot is the VR training and analytics platform by Precihole Sports Foundation for shooters and coaches.",
   applicationName: "PreciShot",
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png",
+    icon: ["/favicon.ico", "/favicon.png"],
+    shortcut: ["/favicon.ico", "/favicon.png"],
+    apple: "/favicon.ico",
   },
 };
 

@@ -30,7 +30,7 @@ export default function LogoutButton({ styleOverride }: Props) {
       }}
       title="Sign out"
     >
-      🔒 Sign out
+     Sign out
     </button>
   );
 }

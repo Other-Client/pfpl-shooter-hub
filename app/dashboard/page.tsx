@@ -123,7 +123,7 @@ export default async function DashboardPage() {
                 display: "inline-block",
               }}
             >
-              🚀 Start VR Experience
+              Start VR Experience
             </button>
           </Link>
         </div>
