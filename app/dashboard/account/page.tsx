@@ -1,17 +1,18 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { redirect } from "next/navigation";
 import AccountSettingsForm from "@/components/AccountSettingsForm";
+import { BackLink } from "@/components/BackLink";
+import { BrandMark } from "@/components/BrandMark";
 import { connectDB } from "@/lib/db";
 import { Shooter } from "@/models/Shooter";
-import { BrandMark } from "@/components/BrandMark";
-import { BackLink } from "@/components/BackLink";
 
 export default async function AccountSettingsPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("authToken")?.value;
+
   if (!token || !process.env.JWT_SECRET) {
     redirect("/login?callbackUrl=/dashboard/account");
   }
@@ -22,6 +23,7 @@ export default async function AccountSettingsPage() {
   let shooterPhone: string | null = null;
   let shooterOrg: string | null = null;
   let shooterRole: string | null = null;
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
     shooterId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
@@ -33,6 +35,7 @@ export default async function AccountSettingsPage() {
   }
 
   await connectDB();
+
   if (shooterId) {
     const shooter = await Shooter.findById(shooterId).lean();
     if (shooter) {
@@ -45,32 +48,17 @@ export default async function AccountSettingsPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "radial-gradient(circle at top left, #0f172a, #020617 60%)",
-        color: "white",
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-        padding: "2rem",
-      }}
-    >
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.85rem",
-            marginBottom: "1.5rem",
-            flexWrap: "wrap",
-          }}
-        >
-          <BackLink href="/dashboard" />
-          <BrandMark showSubtitle={false} href="/dashboard" />
-          <div style={{ marginLeft: "auto", minWidth: "220px" }}>
-            <p style={{ fontSize: "0.8rem", color: "#9ca3af", margin: 0, textAlign: "right" }}>
-              Account Settings
-            </p>
-            <h1 style={{ fontSize: "1.6rem", fontWeight: 800, margin: 0, textAlign: "right" }}>Edit your profile</h1>
+    <main className="theme-shell">
+      <div className="page-container page-container--narrow">
+        <div className="page-header-row">
+          <div className="nav-row">
+            <BackLink href="/dashboard" />
+            <BrandMark showSubtitle={false} href="/dashboard" />
+          </div>
+
+          <div className="page-header-meta">
+            <p className="eyebrow">Account settings</p>
+            <h1 className="page-title">Edit your profile</h1>
           </div>
         </div>
 

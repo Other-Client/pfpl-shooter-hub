@@ -10,27 +10,9 @@ type Props = {
 
 export function BackLink({ href, label = "Back" }: Props) {
   return (
-    <Link
-      href={href}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.35rem",
-        color: "#9ca3af",
-        textDecoration: "none",
-        fontSize: "0.95rem",
-        fontWeight: 500,
-      }}
-    >
+    <Link href={href} className="back-link">
       <ArrowLeft size={16} />
-      <span
-        style={{
-          borderBottom: "1px solid rgba(156,163,175,0.6)",
-          paddingBottom: "0.05rem",
-        }}
-      >
-        {label}
-      </span>
+      <span>{label}</span>
     </Link>
   );
 }

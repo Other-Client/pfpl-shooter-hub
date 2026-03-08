@@ -31,6 +31,7 @@ export default function AccountSettingsForm({
     e.preventDefault();
     setSaving(true);
     setStatus(null);
+
     try {
       const res = await fetch("/api/account/update", {
         method: "PATCH",
@@ -38,9 +39,11 @@ export default function AccountSettingsForm({
         body: JSON.stringify({ name, email, phone, organization, role }),
       });
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data?.error || "Save failed");
       }
+
       if (data?.shooter) {
         setName(data.shooter.name ?? "");
         setEmail(data.shooter.email ?? "");
@@ -48,6 +51,7 @@ export default function AccountSettingsForm({
         setOrganization(data.shooter.organization ?? "");
         setRole(data.shooter.role ?? role);
       }
+
       setStatus("Saved.");
       router.refresh();
     } catch (err) {
@@ -57,24 +61,15 @@ export default function AccountSettingsForm({
     }
   };
 
+  const statusTone = status === "Saved." ? "success" : "error";
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: "grid",
-        gap: "1rem",
-        maxWidth: "480px",
-        background: "rgba(15,23,42,0.85)",
-        border: "1px solid rgba(148,163,184,0.5)",
-        borderRadius: "1rem",
-        padding: "1.25rem",
-      }}
-    >
+    <form onSubmit={handleSubmit} className="panel form-card">
       <Field label="Full name">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={inputStyle}
+          className="input"
           placeholder="Your name"
         />
       </Field>
@@ -82,7 +77,7 @@ export default function AccountSettingsForm({
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={inputStyle}
+          className="input"
           placeholder="you@example.com"
           type="email"
         />
@@ -91,7 +86,7 @@ export default function AccountSettingsForm({
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          style={inputStyle}
+          className="input"
           placeholder="+1 555 123 4567"
         />
       </Field>
@@ -99,7 +94,7 @@ export default function AccountSettingsForm({
         <input
           value={organization}
           onChange={(e) => setOrganization(e.target.value)}
-          style={inputStyle}
+          className="input"
           placeholder="Club / Academy"
         />
       </Field>
@@ -107,7 +102,7 @@ export default function AccountSettingsForm({
         <input
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          style={inputStyle}
+          className="input"
           placeholder="Shooter / Coach / Admin"
         />
       </Field>
@@ -115,40 +110,29 @@ export default function AccountSettingsForm({
       <button
         type="submit"
         disabled={saving}
-        style={{
-          padding: "0.75rem 1rem",
-          borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.7)",
-          background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
-          color: "white",
-          fontWeight: 600,
-          cursor: saving ? "wait" : "pointer",
-          boxShadow: "0 10px 25px rgba(14,165,233,0.28)",
-        }}
+        className="button button-primary button-block"
       >
         {saving ? "Saving..." : "Save changes"}
       </button>
-      {status && (
-        <div style={{ fontSize: "0.85rem", color: "#cbd5f5" }}>{status}</div>
-      )}
+
+      {status ? (
+        <p className={`status-message ${statusTone}`}>{status}</p>
+      ) : null}
     </form>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label style={{ display: "grid", gap: "0.35rem", color: "#e5e7eb", fontSize: "0.9rem" }}>
-      <span style={{ color: "#cbd5f5", fontSize: "0.85rem" }}>{label}</span>
+    <label className="field">
+      <span className="field-label">{label}</span>
       {children}
     </label>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  padding: "0.65rem 0.8rem",
-  borderRadius: "0.75rem",
-  border: "1px solid rgba(148,163,184,0.5)",
-  background: "rgba(15,23,42,0.7)",
-  color: "white",
-  fontSize: "0.95rem",
-};

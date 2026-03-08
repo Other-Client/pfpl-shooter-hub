@@ -22,7 +22,6 @@ export function CreateDummySessionButton() {
         throw new Error(data.error || "Failed to create dummy session");
       }
 
-      // Refresh /dashboard so new session appears
       router.refresh();
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -32,33 +31,22 @@ export function CreateDummySessionButton() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+    <div className="section-stack">
       <button
         type="button"
         onClick={handleClick}
         disabled={loading}
-        style={{
-          padding: "0.55rem 1rem",
-          borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.7)",
-          background:
-            "linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,64,175,0.95))",
-          color: "#e5e7eb",
-          fontSize: "0.85rem",
-          cursor: loading ? "default" : "pointer",
-          opacity: loading ? 0.7 : 1,
-        }}
+        className="button button-secondary button-small"
       >
         {loading ? "Creating test session..." : "Create dummy test session"}
       </button>
-      {error && (
-        <span style={{ fontSize: "0.8rem", color: "#fecaca" }}>{error}</span>
-      )}
-      {!error && (
-        <span style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
-          Quickly add a realistic test session for the currently logged-in
-          shooter. For development use only.
-        </span>
+      {error ? (
+        <p className="status-message error">{error}</p>
+      ) : (
+        <p className="small-note">
+          Quickly add a realistic test session for the current shooter. For
+          development use only.
+        </p>
       )}
     </div>
   );

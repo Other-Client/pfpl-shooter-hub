@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
@@ -35,42 +35,73 @@ interface Props {
   sessionMeta: SessionMeta;
 }
 
-function drawHeatmap(shots: ShotDetail[], opts: { size?: number; bg?: string; ring?: string; dot?: string }) {
-  const { size = 260, bg = "#ffffff", ring = "rgba(0,0,0,0.35)", dot = "#000000" } = opts;
+function drawHeatmap(
+  shots: ShotDetail[],
+  opts: { size?: number; bg?: string; ring?: string; dot?: string }
+) {
+  const {
+    size = 260,
+    bg = "#050505",
+    ring = "rgba(239,191,4,0.3)",
+    dot = "#efbf04",
+  } = opts;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext("2d");
-  if (!ctx) return "";
 
-  if (shots.length === 0) {
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, size, size);
-    return canvas.toDataURL("image/png");
+  if (!ctx) {
+    return "";
   }
-
-  const radii = shots.map((s) => Math.sqrt(s.xMm * s.xMm + s.yMm * s.yMm));
-  const maxR = Math.max(10, ...radii);
-  const cx = size / 2;
-  const cy = size / 2;
-  const scale = (size / 2 - 10) / maxR;
 
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, size, size);
 
+  if (shots.length === 0) {
+    return canvas.toDataURL("image/png");
+  }
+
+  const radii = shots.map((shot) => Math.sqrt(shot.xMm * shot.xMm + shot.yMm * shot.yMm));
+  const maxR = Math.max(10, ...radii);
+  const cx = size / 2;
+  const cy = size / 2;
+  const scale = (size / 2 - 14) / maxR;
+
   ctx.strokeStyle = ring;
   ctx.lineWidth = 1;
   for (let r = maxR; r > 0; r -= maxR / 5) {
-    const radPx = ((size / 2 - 10) * r) / maxR;
+    const radiusPx = ((size / 2 - 14) * r) / maxR;
     ctx.beginPath();
-    ctx.arc(cx, cy, radPx, 0, Math.PI * 2);
+    ctx.arc(cx, cy, radiusPx, 0, Math.PI * 2);
     ctx.stroke();
   }
 
+  ctx.strokeStyle = "rgba(239,191,4,0.14)";
+  ctx.beginPath();
+  ctx.moveTo(cx, 10);
+  ctx.lineTo(cx, size - 10);
+  ctx.moveTo(10, cy);
+  ctx.lineTo(size - 10, cy);
+  ctx.stroke();
+
+  shots.forEach((shot) => {
+    const x = cx + shot.xMm * scale;
+    const y = cy - shot.yMm * scale;
+    const glow = ctx.createRadialGradient(x, y, 0, x, y, 22);
+    glow.addColorStop(0, "rgba(255,243,207,0.92)");
+    glow.addColorStop(0.36, "rgba(239,191,4,0.82)");
+    glow.addColorStop(1, "rgba(239,191,4,0)");
+
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
   ctx.fillStyle = dot;
-  shots.forEach((s) => {
-    const x = cx + s.xMm * scale;
-    const y = cy - s.yMm * scale;
+  shots.forEach((shot) => {
+    const x = cx + shot.xMm * scale;
+    const y = cy - shot.yMm * scale;
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2);
     ctx.fill();
@@ -83,7 +114,12 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const hasShots = shots.length > 0;
   const heatmapDataUrl = useMemo(
-    () => drawHeatmap(shots, { bg: "#ffffff", ring: "rgba(0,0,0,0.35)", dot: "#000" }),
+    () =>
+      drawHeatmap(shots, {
+        bg: "#050505",
+        ring: "rgba(239,191,4,0.3)",
+        dot: "#efbf04",
+      }),
     [shots]
   );
 
@@ -93,7 +129,10 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
       for (const path of candidates) {
         try {
           const res = await fetch(path);
-          if (!res.ok) continue;
+          if (!res.ok) {
+            continue;
+          }
+
           const blob = await res.blob();
           const reader = new FileReader();
           reader.onloadend = () => setLogoDataUrl(reader.result as string);
@@ -104,127 +143,60 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
         }
       }
     };
+
     tryLoadLogo();
   }, []);
 
   const downloadHeatmap = () => {
-    if (!heatmapDataUrl) return;
+    if (!heatmapDataUrl) {
+      return;
+    }
+
     const link = document.createElement("a");
     link.download = `session-${sessionId}-heatmap.png`;
     link.href = heatmapDataUrl;
     link.click();
   };
 
-  const openPreview = () => {
-    const shotsHtml = shots
-      .map((sh, idx) => {
-        const tMs =
-          typeof sh.tsMs === "number"
-            ? Math.round((sh.tsMs - sessionMeta.referenceTime) / 10) / 100
-            : "-";
-        return `<tr>
-          <td>${idx + 1}</td>
-          <td>${tMs}</td>
-          <td>${sh.xMm?.toFixed?.(1) ?? "-"}</td>
-          <td>${sh.yMm?.toFixed?.(1) ?? "-"}</td>
-          <td>${sh.ring ?? "-"}</td>
-          <td>${sh.score?.toFixed?.(1) ?? "-"}</td>
-          <td>${sh.isInnerTen ? "Yes" : ""}</td>
-        </tr>`;
-      })
-      .join("");
-
-    const win = window.open("", "_blank");
-    if (!win) return;
-
-    const html = `<!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>Session ${sessionId} – Preview</title>
-          <style>
-            :root { --ink:#0b1224; --muted:#6b7280; --accent:#2563eb; }
-            * { box-sizing: border-box; }
-            body { margin:0; padding:32px; font-family:"Inter",system-ui,-apple-system,sans-serif; color:var(--ink); background:#f7f8fb; }
-            .page { width:210mm; min-height:297mm; margin:0 auto; background:white; box-shadow:0 20px 60px rgba(15,23,42,0.1); padding:28mm 24mm; }
-            h1 { margin:0 0 6px; font-size:24px; }
-            .muted { color:var(--muted); font-size:13px; }
-            .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px; margin-top:14px; }
-            .card { border:1px solid #e5e7eb; border-radius:12px; padding:14px; background:#f9fafb; }
-            .heatmap { text-align:center; margin-top:18px; }
-            .heatmap img { border-radius:14px; border:1px solid #e5e7eb; max-width:160mm; }
-            table { width:100%; border-collapse:collapse; margin-top:18px; font-size:11px; }
-            th, td { padding:6px 8px; border-bottom:1px solid #e5e7eb; text-align:left; }
-            th { background:#eef2ff; color:#111827; }
-            .actions { margin:16px 0 24px; display:flex; gap:12px; }
-            .btn { padding:10px 14px; border-radius:999px; border:1px solid #cbd5e1; background:white; color:var(--ink); text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:8px; }
-            .btn.primary { background:linear-gradient(135deg,#2563eb,#0ea5e9); border:none; color:white; box-shadow:0 10px 30px rgba(37,99,235,0.28); }
-            @media print { body { background:white; } .page { box-shadow:none; margin:0; width:auto; min-height:auto; padding:0; } .actions { display:none; } }
-          </style>
-        </head>
-        <body>
-          <div class="actions"><button onclick="window.print()" class="btn primary">Print / Save as PDF</button></div>
-          <section class="page">
-            <header>
-              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                ${logoDataUrl ? `<img src="${logoDataUrl}" alt="logo" style="height:32px;width:auto;border-radius:6px;">` : ""}
-                <div>
-                  <h1 style="margin:0;">PreciShot — Session Summary</h1>
-                  <div class="muted">Session ${sessionId}</div>
-                </div>
-              </div>
-            </header>
-            <div class="grid">
-              <div class="card"><div class="muted">Shooter</div><div>${sessionMeta.shooterName ?? sessionMeta.shooterId ?? "N/A"}</div></div>
-              <div class="card"><div class="muted">Started</div><div>${sessionMeta.startedAtLabel}</div></div>
-              <div class="card"><div class="muted">Gun preset</div><div>${sessionMeta.gunPreset}</div></div>
-              <div class="card"><div class="muted">Target type</div><div>${sessionMeta.targetType}</div></div>
-              <div class="card"><div class="muted">Total score</div><div>${sessionMeta.summary.totalScore.toFixed(1)}</div></div>
-              <div class="card"><div class="muted">Average</div><div>${sessionMeta.summary.averageScore.toFixed(1)}</div></div>
-              <div class="card"><div class="muted">Group size</div><div>${sessionMeta.summary.groupSizeMm ? sessionMeta.summary.groupSizeMm.toFixed(1) + " mm" : "-"}</div></div>
-              <div class="card"><div class="muted">Offset</div><div>${sessionMeta.summary.offsetXMm?.toFixed?.(1) ?? "-"} mm, ${sessionMeta.summary.offsetYMm?.toFixed?.(1) ?? "-"} mm</div></div>
-            </div>
-            <div class="heatmap"><div class="muted" style="margin-bottom:8px;">Heat map</div>${heatmapDataUrl ? `<img src="${heatmapDataUrl}" alt="Heatmap" />` : "<div class='muted'>No shots</div>"}</div>
-            <div style="margin-top:18px;">
-              <div style="font-weight:600; margin-bottom:6px;">Shots (${shots.length})</div>
-              <table>
-                <thead><tr><th>#</th><th>Time (s)</th><th>X (mm)</th><th>Y (mm)</th><th>Ring</th><th>Score</th><th>Inner 10</th></tr></thead>
-                <tbody>${shotsHtml || `<tr><td colspan="7" style="text-align:center; padding:12px;">No shots recorded</td></tr>`}</tbody>
-              </table>
-            </div>
-          </section>
-        </body>
-      </html>`;
-
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-  };
-
   const downloadPdf = () => {
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
-    const left = 14;
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
+    const left = 16;
     let y = 18;
 
-    doc.setFillColor(247, 248, 251);
-    doc.rect(10, 10, 190, 277, "F");
+    doc.setFillColor(248, 238, 192);
+    doc.rect(0, 0, 210, 297, "F");
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
+    doc.setFillColor(8, 8, 8);
+    doc.roundedRect(12, 12, 186, 24, 4, 4, "F");
+
     if (logoDataUrl) {
       try {
-        const format = logoDataUrl.startsWith("data:image/png") ? "PNG" : logoDataUrl.startsWith("data:image/jpeg") ? "JPEG" : "PNG";
-        doc.addImage(logoDataUrl, format as any, 160, 12, 24, 10);
-      } catch {}
+        const format = logoDataUrl.startsWith("data:image/png")
+          ? "PNG"
+          : logoDataUrl.startsWith("data:image/jpeg")
+            ? "JPEG"
+            : "PNG";
+        doc.addImage(logoDataUrl, format as any, 170, 16, 18, 10);
+      } catch {
+        /* ignore */
+      }
     }
-    doc.text("PreciShot — Session Summary", left, y);
-    y += 7;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(239, 191, 4);
+    doc.text("PreciShot Session Summary", left, y + 4);
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.setTextColor(90, 96, 112);
-    doc.text(`Session ${sessionId}`, left, y);
-    y += 9;
-    doc.setTextColor(0, 0, 0);
+    doc.setTextColor(193, 160, 48);
+    doc.text(`Session ${sessionId}`, left, y + 11);
+    y += 26;
 
     const meta = [
       ["Shooter", sessionMeta.shooterName ?? sessionMeta.shooterId ?? "N/A"],
@@ -233,23 +205,33 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
       ["Target", sessionMeta.targetType],
       ["Total score", sessionMeta.summary.totalScore.toFixed(1)],
       ["Average", sessionMeta.summary.averageScore.toFixed(1)],
-      ["Group size", sessionMeta.summary.groupSizeMm ? `${sessionMeta.summary.groupSizeMm.toFixed(1)} mm` : "-"],
-      ["Offset", `${sessionMeta.summary.offsetXMm?.toFixed?.(1) ?? "-"} mm / ${sessionMeta.summary.offsetYMm?.toFixed?.(1) ?? "-"} mm`],
+      [
+        "Group size",
+        sessionMeta.summary.groupSizeMm
+          ? `${sessionMeta.summary.groupSizeMm.toFixed(1)} mm`
+          : "-",
+      ],
+      [
+        "Offset",
+        `${sessionMeta.summary.offsetXMm?.toFixed?.(1) ?? "-"} mm / ${
+          sessionMeta.summary.offsetYMm?.toFixed?.(1) ?? "-"
+        } mm`,
+      ],
     ];
 
-    doc.setDrawColor(220);
-    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(210, 170, 28);
+    doc.setFillColor(255, 248, 225);
     doc.roundedRect(left - 2, y - 4, 88, meta.length * 7 + 8, 2, 2, "FD");
 
-    meta.forEach(([label, value], idx) => {
-      const rowY = y + idx * 7;
+    meta.forEach(([label, value], index) => {
+      const rowY = y + index * 7;
       doc.setFontSize(9);
-      doc.setTextColor(99, 102, 110);
-      doc.text(label + ":", left, rowY);
-      doc.setTextColor(17, 24, 39);
+      doc.setTextColor(137, 110, 26);
+      doc.text(`${label}:`, left, rowY);
+      doc.setTextColor(15, 15, 15);
       doc.text(String(value), left + 32, rowY);
-      if (idx < meta.length - 1) {
-        doc.setDrawColor(235);
+      if (index < meta.length - 1) {
+        doc.setDrawColor(232, 211, 122);
         doc.line(left - 2, rowY + 2, left + 84, rowY + 2);
       }
     });
@@ -259,53 +241,60 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
       const imgHeight = 80;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
+      doc.setTextColor(15, 15, 15);
       doc.text("Heatmap", 120, y + 2);
-      doc.roundedRect(118, y + 6, imgWidth + 8, imgHeight + 8, 3, 3);
+      doc.setDrawColor(210, 170, 28);
+      doc.setFillColor(255, 248, 225);
+      doc.roundedRect(118, y + 6, imgWidth + 8, imgHeight + 8, 3, 3, "FD");
       doc.addImage(heatmapDataUrl, "PNG", 122, y + 10, imgWidth, imgHeight);
     }
 
     let tableY = y + 96;
     const headers = ["#", "Time(s)", "X", "Y", "Ring", "Score", "Inner10"];
-    const colX = [14, 28, 48, 66, 84, 106, 132];
+    const colX = [16, 30, 50, 68, 90, 112, 140];
     const rowHeight = 6;
 
     const drawHeader = () => {
+      doc.setFillColor(8, 8, 8);
+      doc.rect(14, tableY - 4, 176, 7, "F");
       doc.setFontSize(10);
-      doc.setTextColor(20, 20, 20);
+      doc.setTextColor(239, 191, 4);
       doc.setFont("helvetica", "bold");
-      headers.forEach((h, i) => doc.text(h, colX[i], tableY));
-      doc.setDrawColor(200);
-      doc.line(colX[0], tableY + 1, 190, tableY + 1);
+      headers.forEach((header, index) => doc.text(header, colX[index], tableY));
       tableY += rowHeight;
     };
 
     drawHeader();
 
     doc.setFontSize(9);
-    doc.setTextColor(40, 40, 40);
+    doc.setTextColor(20, 20, 20);
     doc.setFont("helvetica", "normal");
 
-    shots.forEach((sh, idx) => {
+    shots.forEach((shot, index) => {
       if (tableY > 285) {
         doc.addPage();
+        doc.setFillColor(248, 238, 192);
+        doc.rect(0, 0, 210, 297, "F");
         tableY = 18;
         drawHeader();
       }
+
       const timeVal =
-        typeof sh.tsMs === "number"
-          ? Math.round((sh.tsMs - sessionMeta.referenceTime) / 10) / 100
+        typeof shot.tsMs === "number"
+          ? Math.round((shot.tsMs - sessionMeta.referenceTime) / 10) / 100
           : "-";
       const row = [
-        String(idx + 1),
+        String(index + 1),
         String(timeVal),
-        sh.xMm?.toFixed?.(1) ?? "-",
-        sh.yMm?.toFixed?.(1) ?? "-",
-        sh.ring !== undefined ? String(sh.ring) : "-",
-        sh.score?.toFixed?.(1) ?? "-",
-        sh.isInnerTen ? "Yes" : "",
+        shot.xMm?.toFixed?.(1) ?? "-",
+        shot.yMm?.toFixed?.(1) ?? "-",
+        shot.ring !== undefined ? String(shot.ring) : "-",
+        shot.score?.toFixed?.(1) ?? "-",
+        shot.isInnerTen ? "Yes" : "",
       ];
-      row.forEach((text, i) => doc.text(text, colX[i], tableY));
-      doc.setDrawColor(225);
+
+      row.forEach((text, colIndex) => doc.text(text, colX[colIndex], tableY));
+      doc.setDrawColor(232, 211, 122);
       doc.line(colX[0], tableY + 1, 190, tableY + 1);
       tableY += rowHeight;
     });
@@ -314,66 +303,30 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
   };
 
   return (
-    <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+    <div className="export-actions">
       <a
         href={`/api/session/${sessionId}/csv`}
-        style={{
-          padding: "0.5rem 0.9rem",
-          borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.7)",
-          fontSize: "0.8rem",
-          textDecoration: "none",
-          color: "#e5e7eb",
-          background: "linear-gradient(135deg, rgba(16,185,129,0.9), rgba(59,130,246,0.9))",
-        }}
+        className="button button-secondary button-small"
       >
         Download CSV
       </a>
+
       <button
+        type="button"
         onClick={downloadHeatmap}
         disabled={!hasShots}
-        style={{
-          padding: "0.45rem 0.9rem",
-          borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.7)",
-          background: hasShots ? "linear-gradient(135deg, rgba(37,99,235,0.9), rgba(14,165,233,0.9))" : "rgba(148,163,184,0.2)",
-          color: hasShots ? "white" : "rgba(226,232,240,0.6)",
-          fontSize: "0.8rem",
-          cursor: hasShots ? "pointer" : "not-allowed",
-        }}
+        className="button button-secondary button-small"
       >
-        Download HeatMap Image
+        Download heatmap image
       </button>
-      {/* <button
-        onClick={openPreview}
-        style={{
-          padding: "0.45rem 0.9rem",
-          borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.6)",
-          background: "rgba(59,130,246,0.15)",
-          color: "white",
-          fontSize: "0.8rem",
-          cursor: "pointer",
-        }}
-      >
-        Preview summary (A4)
-      </button> */}
+
       <button
+        type="button"
         onClick={downloadPdf}
-        style={{
-          padding: "0.45rem 0.9rem",
-          borderRadius: "999px",
-          border: "1px solid rgba(148,163,184,0.6)",
-          background: "linear-gradient(135deg, rgba(16,185,129,0.9), rgba(59,130,246,0.9))",
-          color: "white",
-          fontSize: "0.8rem",
-          cursor: "pointer",
-          boxShadow: "0 10px 30px rgba(16,185,129,0.25)",
-        }}
+        className="button button-primary button-small"
       >
         Download PDF summary
       </button>
     </div>
   );
 }
-
