@@ -83,7 +83,7 @@ export default async function DashboardPage() {
         </section>
 
         <div className="action-row" style={{marginBottom:15}}>
-          <Link href="/experience?gameId=demo" className="button button-primary">
+          <Link href="/experience" className="button button-primary">
             Start VR experience
           </Link>
         </div>
