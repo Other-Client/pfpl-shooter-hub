@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import { Shot } from "./ShotHeatmap";
+import { paintShotHeatmap } from "@/lib/heatmap";
 
 interface ShotDetail extends Shot {
   _id?: string;
@@ -54,57 +55,14 @@ function drawHeatmap(
     return "";
   }
 
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, size, size);
-
-  if (shots.length === 0) {
-    return canvas.toDataURL("image/png");
-  }
-
-  const radii = shots.map((shot) => Math.sqrt(shot.xMm * shot.xMm + shot.yMm * shot.yMm));
-  const maxR = Math.max(10, ...radii);
-  const cx = size / 2;
-  const cy = size / 2;
-  const scale = (size / 2 - 14) / maxR;
-
-  ctx.strokeStyle = ring;
-  ctx.lineWidth = 1;
-  for (let r = maxR; r > 0; r -= maxR / 5) {
-    const radiusPx = ((size / 2 - 14) * r) / maxR;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radiusPx, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  ctx.strokeStyle = "rgba(239,191,4,0.14)";
-  ctx.beginPath();
-  ctx.moveTo(cx, 10);
-  ctx.lineTo(cx, size - 10);
-  ctx.moveTo(10, cy);
-  ctx.lineTo(size - 10, cy);
-  ctx.stroke();
-
-  shots.forEach((shot) => {
-    const x = cx + shot.xMm * scale;
-    const y = cy - shot.yMm * scale;
-    const glow = ctx.createRadialGradient(x, y, 0, x, y, 22);
-    glow.addColorStop(0, "rgba(255,243,207,0.92)");
-    glow.addColorStop(0.36, "rgba(239,191,4,0.82)");
-    glow.addColorStop(1, "rgba(239,191,4,0)");
-
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(x, y, 22, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  ctx.fillStyle = dot;
-  shots.forEach((shot) => {
-    const x = cx + shot.xMm * scale;
-    const y = cy - shot.yMm * scale;
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
-    ctx.fill();
+  paintShotHeatmap(ctx, shots, {
+    background: bg,
+    guideRing: ring,
+    crosshair: "rgba(239,191,4,0.14)",
+    markerDot: dot,
+    glowRadius: 20,
+    markerRingRadius: 7.5,
+    markerDotRadius: 3.4,
   });
 
   return canvas.toDataURL("image/png");
@@ -303,12 +261,12 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
   };
 
   return (
-    <div className="export-actions">
+    <div className="export-actions export-actions--session">
       <a
         href={`/api/session/${sessionId}/csv`}
         className="button button-secondary button-small"
       >
-        Download CSV
+        CSV export
       </a>
 
       <button
@@ -317,7 +275,7 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
         disabled={!hasShots}
         className="button button-secondary button-small"
       >
-        Download heatmap image
+        Heatmap PNG
       </button>
 
       <button
@@ -325,7 +283,7 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
         onClick={downloadPdf}
         className="button button-primary button-small"
       >
-        Download PDF summary
+        Summary PDF
       </button>
     </div>
   );

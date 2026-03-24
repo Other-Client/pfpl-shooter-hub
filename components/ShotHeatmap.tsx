@@ -1,11 +1,9 @@
 "use client";
 
 import { MutableRefObject, forwardRef, useEffect, useRef } from "react";
+import { paintShotHeatmap, type HeatmapShot } from "@/lib/heatmap";
 
-export interface Shot {
-  xMm: number;
-  yMm: number;
-}
+export type Shot = HeatmapShot;
 
 interface Props {
   shots: Shot[];
@@ -18,7 +16,7 @@ export const ShotHeatmap = forwardRef<HTMLCanvasElement, Props>(
 
     useEffect(() => {
       const canvas = canvasRef.current;
-      if (!canvas || shots.length === 0) {
+      if (!canvas) {
         return;
       }
 
@@ -27,62 +25,10 @@ export const ShotHeatmap = forwardRef<HTMLCanvasElement, Props>(
         return;
       }
 
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-
-      const radii = shots.map((s) => Math.sqrt(s.xMm * s.xMm + s.yMm * s.yMm));
-      const maxR = Math.max(10, ...radii);
-
-      function toCanvas(s: Shot) {
-        const cx = w / 2;
-        const cy = h / 2;
-        const scale = (w / 2 - 14) / maxR;
-        return {
-          x: cx + s.xMm * scale,
-          y: cy - s.yMm * scale,
-        };
-      }
-
-      ctx.fillStyle = "#050505";
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.strokeStyle = "rgba(239,191,4,0.2)";
-      ctx.lineWidth = 1;
-      for (let r = maxR; r > 0; r -= maxR / 5) {
-        const radiusPx = ((w / 2 - 14) * r) / maxR;
-        ctx.beginPath();
-        ctx.arc(w / 2, h / 2, radiusPx, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      ctx.strokeStyle = "rgba(239,191,4,0.1)";
-      ctx.beginPath();
-      ctx.moveTo(w / 2, 10);
-      ctx.lineTo(w / 2, h - 10);
-      ctx.moveTo(10, h / 2);
-      ctx.lineTo(w - 10, h / 2);
-      ctx.stroke();
-
-      shots.forEach((s) => {
-        const { x, y } = toCanvas(s);
-        const glow = ctx.createRadialGradient(x, y, 0, x, y, 24);
-        glow.addColorStop(0, "rgba(255,243,207,0.88)");
-        glow.addColorStop(0.34, "rgba(239,191,4,0.82)");
-        glow.addColorStop(1, "rgba(239,191,4,0)");
-
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(x, y, 24, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.fillStyle = "#efbf04";
-      shots.forEach((s) => {
-        const { x, y } = toCanvas(s);
-        ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
-        ctx.fill();
+      paintShotHeatmap(ctx, shots, {
+        glowRadius: 20,
+        markerRingRadius: 7.5,
+        markerDotRadius: 3.4,
       });
     }, [shots, size]);
 

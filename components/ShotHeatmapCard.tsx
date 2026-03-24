@@ -19,19 +19,19 @@ export function ShotHeatmapCard({ shots }: Props) {
 
   return (
     <section className="panel heatmap-card">
-      <div>
+      <div className="heatmap-card__header">
         <p className="eyebrow">Cluster view</p>
         <h2 className="section-title section-title--small">Shot heatmap</h2>
       </div>
 
       {hasShots ? (
-        <>
+        <div className="heatmap-card__body">
           <ShotHeatmap shots={shots} size={280} />
           <p className="heatmap-caption">
-            Brighter gold areas indicate denser shot clusters around the target
-            center.
+            Solid markers show each impact while the glow reveals grouping
+            density.
           </p>
-        </>
+        </div>
       ) : (
         <p className="empty-state">No shots recorded in this session.</p>
       )}

@@ -15,6 +15,8 @@ interface PageProps {
   params: SessionRouteParams | Promise<SessionRouteParams>;
 }
 
+const formatSessionLabel = (value: string) => value.replace(/_/g, " ");
+
 export default async function SessionDetailPage(props: PageProps) {
   const { id: sessionId } = await props.params;
 
@@ -99,8 +101,8 @@ export default async function SessionDetailPage(props: PageProps) {
     shooterId,
     shooterName,
     startedAtLabel: startedAtIst,
-    gunPreset: session.gunPreset,
-    targetType: session.targetType,
+    gunPreset: formatSessionLabel(session.gunPreset),
+    targetType: formatSessionLabel(session.targetType),
     summary: {
       totalScore,
       averageScore,
@@ -115,29 +117,34 @@ export default async function SessionDetailPage(props: PageProps) {
   return (
     <main className="theme-shell">
       <div className="page-container">
-        <div className="page-header-row">
+        <div className="page-header-row page-header-row--session">
           <div className="nav-row">
             <BackLink href="/dashboard" />
             <BrandMark subtitle="Session" href="/dashboard" />
           </div>
         </div>
 
-        <section className="page-heading">
+        <section className="page-heading page-heading--session">
           <p className="eyebrow">Session breakdown</p>
           <h1 className="page-title">Session details</h1>
-          <p className="muted-copy">
-            {startedAtIst} / {session.gunPreset} / {session.targetType}
-          </p>
+          <div className="session-meta-row">
+            <span>{startedAtIst}</span>
+            <span>{formatSessionLabel(session.gunPreset)}</span>
+            <span>{formatSessionLabel(session.targetType)}</span>
+          </div>
         </section>
 
-        <section className="detail-layout">
-          <div className="panel section-stack">
-            <div>
+        <section className="detail-layout detail-layout--session">
+          <div className="panel section-stack session-overview-panel">
+            <div className="session-section-header">
               <p className="eyebrow">Performance summary</p>
               <h2 className="section-title">Session metrics</h2>
+              <p className="section-lead">
+                Quick read on score, grouping, and average point of impact.
+              </p>
             </div>
 
-            <div className="summary-grid">
+            <div className="summary-grid summary-grid--session">
               <SummaryField label="Shots" value={shotCount.toString()} />
               <SummaryField label="Total score" value={totalScore.toFixed(1)} />
               <SummaryField label="Average" value={averageScore.toFixed(1)} />
@@ -155,12 +162,16 @@ export default async function SessionDetailPage(props: PageProps) {
               />
             </div>
 
-            <div className="section-stack">
-              <div>
+            <div className="section-stack session-downloads">
+              <div className="session-section-header">
                 <p className="eyebrow">Downloads and exports</p>
                 <h3 className="section-title section-title--small">
                   Session files
                 </h3>
+                <p className="section-lead">
+                  Export the raw data, the visual cluster map, or a printable
+                  session summary.
+                </p>
               </div>
               <SessionDownloads
                 shots={shotsPlain as any}
@@ -173,8 +184,8 @@ export default async function SessionDetailPage(props: PageProps) {
           <ShotHeatmapCard shots={shotsPlain as any} />
         </section>
 
-        <section className="panel section-stack">
-          <div>
+        <section className="panel section-stack session-log-panel">
+          <div className="session-section-header">
             <p className="eyebrow">Shot log</p>
             <h2 className="section-title">Recorded shots</h2>
           </div>
