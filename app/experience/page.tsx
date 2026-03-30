@@ -11,7 +11,7 @@ function ExperienceContent() {
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [rawToken, setRawToken] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const experienceUrl = "https://app.zimension3d.com/#/world-guest";
+  const experienceUrl = "https://dev-app.zimension3d.com/#/world-guest";
 
   useEffect(() => {
     if (status === "loading") {
