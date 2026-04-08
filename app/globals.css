@@ -20,7 +20,7 @@
   --danger: #ff7979;
   --success: #f5d96f;
   --shadow: 0 28px 90px rgba(0, 0, 0, 0.5);
-  --font-display: var(--font-montserrat), "Montserrat", sans-serif;
+  --font-display: "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   --page-width: 1180px;
   --page-width-narrow: 920px;
