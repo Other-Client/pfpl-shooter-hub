@@ -8,6 +8,7 @@ import { ShotHeatmapCard } from "@/components/ShotHeatmapCard";
 import { connectDB } from "@/lib/db";
 import { Shot } from "@/models/Shot";
 import { Session } from "@/models/Session";
+import { Shooter } from "@/models/Shooter";
 
 type SessionRouteParams = { id: string };
 
@@ -29,11 +30,13 @@ export default async function SessionDetailPage(props: PageProps) {
 
   let shooterId: string | null = null;
   let shooterName: string | null = null;
+  let shooterEmail: string | null = null;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
     shooterId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
     shooterName = decoded?.name ?? decoded?.email ?? null;
+    shooterEmail = decoded?.email ?? null;
   } catch {
     shooterId = null;
   }
@@ -43,6 +46,10 @@ export default async function SessionDetailPage(props: PageProps) {
   }
 
   await connectDB();
+
+  const shooter = await Shooter.findById(shooterId).select("name email").lean();
+  shooterName = shooter?.name || shooterName;
+  shooterEmail = shooter?.email || shooterEmail;
 
   const session = await Session.findOne({ _id: sessionId, shooterId }).lean();
   if (!session) {
@@ -177,6 +184,7 @@ export default async function SessionDetailPage(props: PageProps) {
                 shots={shotsPlain as any}
                 sessionId={sessionId}
                 sessionMeta={sessionMeta}
+                defaultRecipientEmail={shooterEmail}
               />
             </div>
           </div>

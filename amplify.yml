@@ -13,6 +13,10 @@ frontend:
         - env | grep -e '^JWT_SECRET=' >> .env.production || true
         - env | grep -e '^NEXTAUTH_SECRET=' >> .env.production || true
         - env | grep -e '^NEXTAUTH_URL=' >> .env.production || true
+        - env | grep -e '^APP_BASE_URL=' >> .env.production || true
+        - env | grep -e '^EMAIL_FROM=' >> .env.production || true
+        - env | grep -e '^EMAIL_REPLY_TO=' >> .env.production || true
+        - env | grep -e '^SES_REGION=' >> .env.production || true
         - env | grep -e '^S3_REGION=' >> .env.production || true
         - env | grep -e '^S3_BUCKET=' >> .env.production || true
         - env | grep -e '^NEXT_PUBLIC_' >> .env.production || true

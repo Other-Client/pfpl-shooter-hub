@@ -81,6 +81,12 @@ function LoginFormInner() {
             />
           </label>
 
+          <div className="auth-links">
+            <Link href="/forgot-password" className="text-link">
+              Forgot password?
+            </Link>
+          </div>
+
           <button
             type="submit"
             disabled={loading}

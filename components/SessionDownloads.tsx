@@ -34,6 +34,7 @@ interface Props {
   shots: ShotDetail[];
   sessionId: string;
   sessionMeta: SessionMeta;
+  defaultRecipientEmail?: string | null;
 }
 
 function drawHeatmap(
@@ -68,8 +69,21 @@ function drawHeatmap(
   return canvas.toDataURL("image/png");
 }
 
-export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
+export function SessionDownloads({
+  shots,
+  sessionId,
+  sessionMeta,
+  defaultRecipientEmail,
+}: Props) {
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [recipientEmail, setRecipientEmail] = useState(
+    defaultRecipientEmail || ""
+  );
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
   const hasShots = shots.length > 0;
   const heatmapDataUrl = useMemo(
     () =>
@@ -260,31 +274,95 @@ export function SessionDownloads({ shots, sessionId, sessionMeta }: Props) {
     doc.save(`session-${sessionId}-summary.pdf`);
   };
 
+  const emailReport = async () => {
+    setSendingEmail(true);
+    setEmailStatus(null);
+
+    try {
+      const response = await fetch(`/api/session/${sessionId}/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientEmail }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to send report email.");
+      }
+
+      setRecipientEmail(data?.recipientEmail || recipientEmail);
+      setEmailStatus({
+        tone: "success",
+        message: data?.message || "Session report email sent.",
+      });
+    } catch (error) {
+      setEmailStatus({
+        tone: "error",
+        message:
+          (error as Error).message || "Failed to send session report email.",
+      });
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   return (
-    <div className="export-actions export-actions--session">
-      <a
-        href={`/api/session/${sessionId}/csv`}
-        className="button button-secondary button-small"
-      >
-        CSV export
-      </a>
+    <div className="section-stack">
+      <div className="export-actions export-actions--session">
+        <a
+          href={`/api/session/${sessionId}/csv`}
+          className="button button-secondary button-small"
+        >
+          CSV export
+        </a>
 
-      <button
-        type="button"
-        onClick={downloadHeatmap}
-        disabled={!hasShots}
-        className="button button-secondary button-small"
-      >
-        Heatmap PNG
-      </button>
+        <button
+          type="button"
+          onClick={downloadHeatmap}
+          disabled={!hasShots}
+          className="button button-secondary button-small"
+        >
+          Heatmap PNG
+        </button>
 
-      <button
-        type="button"
-        onClick={downloadPdf}
-        className="button button-primary button-small"
-      >
-        Summary PDF
-      </button>
+        <button
+          type="button"
+          onClick={downloadPdf}
+          className="button button-primary button-small"
+        >
+          Summary PDF
+        </button>
+      </div>
+
+      <div className="session-email-form">
+        <div className="session-email-grid">
+          <label className="field session-email-field">
+            <span className="field-label">Email report to</span>
+            <input
+              type="email"
+              value={recipientEmail}
+              onChange={(event) => setRecipientEmail(event.target.value)}
+              className="input"
+              placeholder="coach@example.com"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={emailReport}
+            disabled={sendingEmail}
+            className="button button-secondary"
+          >
+            {sendingEmail ? "Sending..." : "Email report"}
+          </button>
+        </div>
+
+        {emailStatus ? (
+          <p className={`status-message ${emailStatus.tone}`}>
+            {emailStatus.message}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

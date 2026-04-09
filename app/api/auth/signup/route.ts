@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
+import { sendWelcomeEmail } from "@/lib/email";
 import { Shooter } from "@/models/Shooter";
 
 export async function POST(req: NextRequest) {
@@ -44,11 +45,23 @@ export async function POST(req: NextRequest) {
     passwordHash,
   });
 
+  let welcomeEmailSent = false;
+  try {
+    await sendWelcomeEmail({
+      to: emailTrimmed,
+      name: nameTrimmed,
+    });
+    welcomeEmailSent = true;
+  } catch (error) {
+    console.error("Welcome email error:", error);
+  }
+
   return NextResponse.json(
     {
       shooterId: shooter._id.toString(),
       name: shooter.name,
       email: shooter.email,
+      welcomeEmailSent,
     },
     { status: 201 }
   );
