@@ -2,12 +2,29 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 import { AccountMenu } from "@/components/AccountMenu";
 import { BrandMark } from "@/components/BrandMark";
 import LogToken from "@/components/LogToken";
 import { connectDB } from "@/lib/db";
 import { Shot } from "@/models/Shot";
 import { Session } from "@/models/Session";
+
+function formatLastSessionStamp(value: Date | string) {
+  const date = new Date(value);
+
+  return {
+    date: new Intl.DateTimeFormat("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(date),
+    time: new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date),
+  };
+}
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -45,9 +62,12 @@ export default async function DashboardPage() {
     sessionId: { $in: sessions.map((session) => session._id) },
   });
   const lastSession = sessions[0];
+  const lastSessionStamp = lastSession
+    ? formatLastSessionStamp(lastSession.startedAt)
+    : null;
 
   return (
-    <main className="theme-shell">
+    <main className="theme-shell dashboard-page">
       <LogToken />
 
       <div className="page-container">
@@ -67,23 +87,42 @@ export default async function DashboardPage() {
           </p>
         </section>
 
-        <section className="stats-grid">
-          <SummaryCard label="Total sessions" value={totalSessions.toString()} />
+        <section className="stats-grid dashboard-stats-grid">
           <SummaryCard
+            className="dashboard-summary-card dashboard-summary-card--metric"
+            label="Total sessions"
+            value={totalSessions.toString()}
+          />
+          <SummaryCard
+            className="dashboard-summary-card dashboard-summary-card--metric"
             label="Shots in last 20 sessions"
             value={totalShots.toString()}
           />
-          {lastSession ? (
+          {lastSession && lastSessionStamp ? (
             <SummaryCard
+              className="dashboard-summary-card dashboard-summary-card--session"
               label="Last session"
-              value={new Date(lastSession.startedAt).toLocaleString()}
+              value={
+                <div className="dashboard-session-stamp">
+                  <span className="dashboard-session-stamp__date">
+                    {lastSessionStamp.date}
+                  </span>
+                  <span className="dashboard-session-stamp__time">
+                    {lastSessionStamp.time}
+                  </span>
+                </div>
+              }
+              valueClassName="dashboard-session-value"
               subtitle={`${lastSession.gunPreset} / ${lastSession.targetType}`}
             />
           ) : null}
         </section>
 
-        <div className="action-row" style={{marginBottom:15}}>
-          <Link href="/experience" className="button button-primary">
+        <div className="action-row dashboard-action-row">
+          <Link
+            href="/experience"
+            className="button button-primary button-small dashboard-start-button"
+          >
             Start VR experience
           </Link>
         </div>
@@ -148,15 +187,25 @@ function SummaryCard({
   label,
   value,
   subtitle,
+  className,
+  valueClassName,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   subtitle?: string;
+  className?: string;
+  valueClassName?: string;
 }) {
   return (
-    <div className="summary-card">
+    <div className={["summary-card", className].filter(Boolean).join(" ")}>
       <div className="summary-card__label">{label}</div>
-      <div className="summary-card__value">{value}</div>
+      <div
+        className={["summary-card__value", valueClassName]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {value}
+      </div>
       {subtitle ? <div className="summary-card__meta">{subtitle}</div> : null}
     </div>
   );

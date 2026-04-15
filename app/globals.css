@@ -1032,6 +1032,93 @@ a {
   font-size: 0.88rem;
 }
 
+.dashboard-page .page-heading {
+  margin-bottom: 1.45rem;
+}
+
+.dashboard-page .muted-copy {
+  max-width: 38rem;
+  font-size: 0.96rem;
+}
+
+.dashboard-stats-grid {
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: 0.85rem;
+  margin-bottom: 1.4rem;
+}
+
+.dashboard-summary-card {
+  display: grid;
+  align-content: start;
+  gap: 0.2rem;
+  min-height: 8.75rem;
+  padding: 1rem 1.1rem 0.95rem;
+  border-radius: 1.25rem;
+}
+
+.dashboard-summary-card--metric {
+  min-height: 7.4rem;
+  padding-block: 0.95rem 0.85rem;
+}
+
+.dashboard-summary-card .summary-card__label {
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dashboard-summary-card .summary-card__value {
+  margin-top: 0.15rem;
+  font-size: clamp(1.85rem, 2.7vw, 2.3rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-summary-card--metric .summary-card__value {
+  font-size: clamp(1.65rem, 2.25vw, 1.95rem);
+}
+
+.dashboard-summary-card .summary-card__meta {
+  margin-top: auto;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.dashboard-summary-card--session .summary-card__meta {
+  color: var(--text-secondary);
+}
+
+.dashboard-session-value {
+  margin-top: 0.2rem;
+}
+
+.dashboard-session-stamp {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.dashboard-session-stamp__date {
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
+  line-height: 1;
+}
+
+.dashboard-session-stamp__time {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.dashboard-action-row {
+  margin-bottom: 0.9rem;
+}
+
+.dashboard-start-button {
+  min-height: 2.85rem;
+  padding-inline: 1.15rem;
+}
+
 .section-stack {
   display: grid;
   gap: 1rem;
@@ -1521,6 +1608,10 @@ a {
     margin-left: 0;
     text-align: left;
   }
+
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
@@ -1605,6 +1696,15 @@ a {
   .choice-grid,
   .cta-banner__actions {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .dashboard-summary-card {
+    min-height: auto;
   }
 
   .site-footer__bottom {

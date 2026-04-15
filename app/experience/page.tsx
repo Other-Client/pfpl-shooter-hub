@@ -12,6 +12,7 @@ function ExperienceContent() {
   const [rawToken, setRawToken] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const experienceUrl = "https://app.zimension3d.com/#/project-guest";
+  const experienceUrl2 = "https://staging.d2wz04s4v7t31e.amplifyapp.com/";
 
   useEffect(() => {
     if (status === "loading") {
@@ -37,10 +38,10 @@ function ExperienceContent() {
     if (!gameId) {
       return;
     }
-
+    const url = `${experienceUrl2}/${gameId}`
     const src = rawToken
-      ? `${experienceUrl}/${gameId}?appauth=${rawToken}`
-      : `${experienceUrl}/${gameId}`;
+      ? `${url}?appauth=${rawToken}`
+      : url;
     setIframeSrc(src);
   }, [status, gameId, rawToken]);
 
