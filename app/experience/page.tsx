@@ -12,7 +12,7 @@ function ExperienceContent() {
   const [rawToken, setRawToken] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const experienceUrl = "https://app.zimension3d.com/#/project-guest";
-  const experienceUrl2 = "https://staging.d2wz04s4v7t31e.amplifyapp.com/";
+  const experienceUrl2 = "https://staging.d2wz04s4v7t31e.amplifyapp.com";
 
   useEffect(() => {
     if (status === "loading") {
