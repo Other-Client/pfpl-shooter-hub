@@ -38,7 +38,8 @@ function ExperienceContent() {
     if (!gameId) {
       return;
     }
-    const url = `${experienceUrl2}/${gameId}`
+    // const url = `${experienceUrl}/${gameId}`
+    const url = experienceUrl2
     const src = rawToken
       ? `${url}?appauth=${rawToken}`
       : url;
