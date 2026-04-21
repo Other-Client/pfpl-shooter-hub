@@ -48,6 +48,8 @@ function getEmailConfig() {
   const accessKeyId = process.env.SES_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.SES_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
 
+  console.log("[SES config] region:", region, "| keyId:", accessKeyId ? accessKeyId.slice(0, 6) + "***" : "MISSING", "| secret:", secretAccessKey ? "SET" : "MISSING");
+
   if (!region) {
     throw new Error("Missing required environment variable: SES_REGION");
   }
