@@ -14,10 +14,15 @@ function LoginFormInner() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unverified, setUnverified] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setUnverified(false);
+    setResendDone(false);
     setLoading(true);
 
     try {
@@ -31,6 +36,9 @@ function LoginFormInner() {
       setLoading(false);
 
       if (!response.ok) {
+        if (data?.code === "EMAIL_NOT_VERIFIED") {
+          setUnverified(true);
+        }
         setError(data?.error || "Login failed");
         return;
       }
@@ -39,6 +47,29 @@ function LoginFormInner() {
     } catch (err) {
       setLoading(false);
       setError((err as Error).message || "Login failed");
+    }
+  }
+
+  async function handleResend() {
+    if (!email) return;
+    setResending(true);
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error || "Unable to resend. Please try again.");
+      } else {
+        setResendDone(true);
+        setError(null);
+      }
+    } catch {
+      setError("Unable to resend. Please try again.");
+    } finally {
+      setResending(false);
     }
   }
 
@@ -96,7 +127,28 @@ function LoginFormInner() {
           </button>
         </form>
 
-        {error ? <p className="status-message error">{error}</p> : null}
+        {error ? (
+          <div>
+            <p className="status-message error">{error}</p>
+            {unverified && (
+              resendDone ? (
+                <p className="status-message success" style={{ marginTop: "8px" }}>
+                  Verification email sent — check your inbox.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending || !email}
+                  className="text-link"
+                  style={{ marginTop: "8px", display: "block", background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: "inherit" }}
+                >
+                  {resending ? "Sending…" : "Resend verification email"}
+                </button>
+              )
+            )}
+          </div>
+        ) : null}
 
         <p className="auth-footer small-note">
           First time?{" "}

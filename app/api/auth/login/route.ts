@@ -41,6 +41,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
+  if (!shooter.emailVerified) {
+    return NextResponse.json(
+      { error: "Please verify your email address before logging in.", code: "EMAIL_NOT_VERIFIED" },
+      { status: 403 }
+    );
+  }
+
   const token = jwt.sign(
     {
       sub: shooter._id.toString(),

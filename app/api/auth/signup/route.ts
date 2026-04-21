@@ -1,8 +1,10 @@
+import { createHash, randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/db";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendVerificationEmail, getAppBaseUrl } from "@/lib/email";
 import { Shooter } from "@/models/Shooter";
+import { EmailVerificationToken } from "@/models/EmailVerificationToken";
 
 export async function POST(req: NextRequest) {
   await connectDB();
@@ -43,17 +45,29 @@ export async function POST(req: NextRequest) {
     email: emailTrimmed,
     dominantEye: dominantEye === "left" || dominantEye === "right" ? dominantEye : undefined,
     passwordHash,
+    emailVerified: false,
   });
 
-  let welcomeEmailSent = false;
+  // Create verification token (24h TTL)
+  const plainToken = randomBytes(32).toString("hex");
+  const hashedToken = createHash("sha256").update(plainToken).digest("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  await EmailVerificationToken.create({
+    shooterId: shooter._id,
+    hashedToken,
+    expiresAt,
+  });
+
+  const baseUrl = getAppBaseUrl() ?? "";
+  const verifyUrl = `${baseUrl}/verify-email?token=${plainToken}`;
+
+  let verificationEmailSent = false;
   try {
-    await sendWelcomeEmail({
-      to: emailTrimmed,
-      name: nameTrimmed,
-    });
-    welcomeEmailSent = true;
+    await sendVerificationEmail({ to: emailTrimmed, name: nameTrimmed, verifyUrl });
+    verificationEmailSent = true;
   } catch (error) {
-    console.error("Welcome email error:", error);
+    console.error("Verification email error:", error);
   }
 
   return NextResponse.json(
@@ -61,7 +75,7 @@ export async function POST(req: NextRequest) {
       shooterId: shooter._id.toString(),
       name: shooter.name,
       email: shooter.email,
-      welcomeEmailSent,
+      verificationEmailSent,
     },
     { status: 201 }
   );

@@ -1,13 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 
 export default function SignupPage() {
-  const router = useRouter();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,10 +44,6 @@ export default function SignupPage() {
       }
 
       setSuccess(true);
-
-      setTimeout(() => {
-        router.push("/login");
-      }, 1200);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -136,9 +129,12 @@ export default function SignupPage() {
 
         {error ? <p className="status-message error">{error}</p> : null}
         {success ? (
-          <p className="status-message success">
-            Account created successfully. Redirecting...
-          </p>
+          <div className="status-message success">
+            <strong>Check your inbox.</strong>
+            <p style={{ margin: "6px 0 0", fontSize: "13px" }}>
+              We sent a verification link to <strong>{email}</strong>. Click it to activate your account.
+            </p>
+          </div>
         ) : null}
 
         <p className="auth-footer small-note">

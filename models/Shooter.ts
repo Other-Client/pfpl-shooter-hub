@@ -8,6 +8,7 @@ export interface IShooter extends Document {
   organization?: string;
   passwordHash: string;
   role: "shooter" | "coach" | "admin";
+  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,9 +26,15 @@ const ShooterSchema = new Schema<IShooter>(
       enum: ["shooter", "coach", "admin"],
       default: "shooter",
     },
+    emailVerified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
+
+// Delete cached model in dev so schema changes are always picked up after hot reload
+if (process.env.NODE_ENV !== "production" && mongoose.models.Shooter) {
+  delete (mongoose.models as Record<string, unknown>).Shooter;
+}
 
 export const Shooter: Model<IShooter> =
   mongoose.models.Shooter || mongoose.model<IShooter>("Shooter", ShooterSchema);
