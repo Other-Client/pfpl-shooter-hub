@@ -147,7 +147,7 @@ async function sendMail(input: SendMailInput) {
   const ses = new AWS.SES({
     region,
     ...(accessKeyId && secretAccessKey
-      ? { credentials: { accessKeyId, secretAccessKey } }
+      ? { accessKeyId, secretAccessKey }
       : {}),
   });
 
