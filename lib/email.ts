@@ -45,12 +45,14 @@ function getEmailConfig() {
   const region = process.env.SES_REGION || process.env.AWS_REGION;
   const from = process.env.EMAIL_FROM || "support@precishot.com";
   const replyTo = process.env.EMAIL_REPLY_TO || "support@precishot.com";
+  const accessKeyId = process.env.SES_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.SES_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
 
   if (!region) {
     throw new Error("Missing required environment variable: SES_REGION");
   }
 
-  return { region, from, replyTo };
+  return { region, from, replyTo, accessKeyId, secretAccessKey };
 }
 
 function getAppBaseUrl() {
@@ -141,8 +143,13 @@ function renderEmailShell(opts: {
 }
 
 async function sendMail(input: SendMailInput) {
-  const { region, from, replyTo } = getEmailConfig();
-  const ses = new AWS.SES({ region });
+  const { region, from, replyTo, accessKeyId, secretAccessKey } = getEmailConfig();
+  const ses = new AWS.SES({
+    region,
+    ...(accessKeyId && secretAccessKey
+      ? { credentials: { accessKeyId, secretAccessKey } }
+      : {}),
+  });
 
   await ses
     .sendEmail({
