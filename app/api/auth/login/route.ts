@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
       userId: shooter._id.toString(),
       email: shooter.email,
       name: shooter.name,
+      role: shooter.role,
     },
     JWT_SECRET,
     { expiresIn: "30d" }

@@ -28,33 +28,62 @@ export default async function SessionDetailPage(props: PageProps) {
     redirect(`/login?callbackUrl=/dashboard/session/${sessionId}`);
   }
 
-  let shooterId: string | null = null;
+  let currentUserId: string | null = null;
   let shooterName: string | null = null;
   let shooterEmail: string | null = null;
+  let shooterOrganization: string | null = null;
+  let userRole: string | null = null;
+  let isCoachView = false;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
-    shooterId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
+    currentUserId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
     shooterName = decoded?.name ?? decoded?.email ?? null;
     shooterEmail = decoded?.email ?? null;
+    userRole = decoded?.role ?? "shooter";
   } catch {
-    shooterId = null;
+    currentUserId = null;
   }
 
-  if (!shooterId) {
+  if (!currentUserId) {
     redirect(`/login?callbackUrl=/dashboard/session/${sessionId}`);
   }
 
   await connectDB();
 
-  const shooter = await Shooter.findById(shooterId).select("name email").lean();
-  shooterName = shooter?.name || shooterName;
-  shooterEmail = shooter?.email || shooterEmail;
-
-  const session = await Session.findOne({ _id: sessionId, shooterId }).lean();
+  // Fetch the session without owner restriction first
+  const session = await Session.findById(sessionId).lean();
   if (!session) {
     redirect("/dashboard");
   }
+
+  const sessionOwnerId = (session as any).shooterId?.toString();
+
+  if (sessionOwnerId === currentUserId) {
+    // Owner: load their own info
+    const shooter = await Shooter.findById(currentUserId).select("name email organization").lean();
+    shooterName = shooter?.name || shooterName;
+    shooterEmail = (shooter as any)?.email || shooterEmail;
+    shooterOrganization = (shooter as any)?.organization ?? null;
+  } else if (userRole === "coach") {
+    // Coach: verify the session owner is one of their shooters
+    const sessionShooter = await Shooter.findOne({
+      _id: sessionOwnerId,
+      coachId: currentUserId,
+    }).select("name email organization").lean();
+
+    if (!sessionShooter) {
+      redirect("/dashboard");
+    }
+    shooterName = sessionShooter.name;
+    shooterEmail = (sessionShooter as any).email ?? null;
+    shooterOrganization = (sessionShooter as any).organization ?? null;
+    isCoachView = true;
+  } else {
+    redirect("/dashboard");
+  }
+
+  const shooterId = sessionOwnerId;
 
   const shots = await Shot.find({ sessionId }).sort({ index: 1 }).lean();
   const shotsPlain = shots.map((shot: any) => ({
@@ -126,7 +155,13 @@ export default async function SessionDetailPage(props: PageProps) {
       <div className="page-container">
         <div className="page-header-row page-header-row--session">
           <div className="nav-row">
-            <BackLink href="/dashboard" />
+            <BackLink
+              href={
+                isCoachView
+                  ? `/dashboard/coach/shooter/${shooterId}`
+                  : "/dashboard"
+              }
+            />
             <BrandMark subtitle="Session" href="/dashboard" />
           </div>
         </div>
@@ -140,6 +175,17 @@ export default async function SessionDetailPage(props: PageProps) {
             <span>{formatSessionLabel(session.targetType)}</span>
           </div>
         </section>
+
+        {isCoachView && (
+          <section className="panel section-stack shooter-info-panel">
+            <p className="eyebrow">Shooter</p>
+            <p className="section-title">{shooterName}</p>
+            <div className="session-meta-row">
+              {shooterEmail && <span>{shooterEmail}</span>}
+              {shooterOrganization && <span>{shooterOrganization}</span>}
+            </div>
+          </section>
+        )}
 
         <section className="detail-layout detail-layout--session">
           <div className="panel section-stack session-overview-panel">

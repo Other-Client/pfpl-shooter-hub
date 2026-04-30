@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   await connectDB();
 
   const body = await req.json();
-  const { name, email, password, dominantEye } = body ?? {};
+  const { name, email, password, dominantEye, role } = body ?? {};
 
   if (!name || !email || !password) {
     return NextResponse.json(
@@ -40,11 +40,14 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await bcrypt.hash(passwordStr, 12);
 
+  const allowedRole = role === "coach" ? "coach" : "shooter";
+
   const shooter = await Shooter.create({
     name: nameTrimmed,
     email: emailTrimmed,
     dominantEye: dominantEye === "left" || dominantEye === "right" ? dominantEye : undefined,
     passwordHash,
+    role: allowedRole,
     emailVerified: false,
   });
 

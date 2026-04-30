@@ -9,6 +9,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dominantEye, setDominantEye] = useState<"left" | "right" | "">("");
+  const [role, setRole] = useState<"shooter" | "coach">("shooter");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -32,6 +33,7 @@ export default function SignupPage() {
           name,
           email,
           password,
+          role,
           dominantEye: dominantEye || undefined,
         }),
       });
@@ -66,6 +68,22 @@ export default function SignupPage() {
         </header>
 
         <form onSubmit={onSubmit} className="form-grid">
+          <div className="field">
+            <span className="field-label">Account type</span>
+            <div className="choice-grid">
+              {(["shooter", "coach"] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRole(r)}
+                  className={`choice-button${role === r ? " is-active" : ""}`}
+                >
+                  {r === "shooter" ? "Shooter" : "Coach"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <label className="field">
             <span className="field-label">Full name</span>
             <input

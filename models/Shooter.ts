@@ -9,6 +9,7 @@ export interface IShooter extends Document {
   passwordHash: string;
   role: "shooter" | "coach" | "admin";
   emailVerified: boolean;
+  coachId?: mongoose.Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +28,7 @@ const ShooterSchema = new Schema<IShooter>(
       default: "shooter",
     },
     emailVerified: { type: Boolean, default: false },
+    coachId: { type: Schema.Types.ObjectId, ref: "Shooter", default: null },
   },
   { timestamps: true }
 );

@@ -9,6 +9,8 @@ import LogToken from "@/components/LogToken";
 import { connectDB } from "@/lib/db";
 import { Shot } from "@/models/Shot";
 import { Session } from "@/models/Session";
+import { Shooter } from "@/models/Shooter";
+import { CoachRequest } from "@/models/CoachRequest";
 
 function formatLastSessionStamp(value: Date | string) {
   const date = new Date(value);
@@ -34,30 +36,47 @@ export default async function DashboardPage() {
     redirect("/login?callbackUrl=/dashboard");
   }
 
-  let shooterId: string | null = null;
-  let shooterName: string | null = null;
+  let userId: string | null = null;
+  let userName: string | null = null;
+  let userRole: string | null = null;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
-    shooterId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
-    shooterName = decoded?.name ?? null;
+    userId = decoded?.userId ?? decoded?.sub ?? decoded?.id ?? null;
+    userName = decoded?.name ?? null;
+    userRole = decoded?.role ?? "shooter";
   } catch {
-    shooterId = null;
-    shooterName = null;
+    userId = null;
   }
 
-  if (!shooterId) {
+  if (!userId) {
     redirect("/login?callbackUrl=/dashboard");
   }
 
   await connectDB();
 
-  const sessions = await Session.find({ shooterId })
+  if (userRole === "coach") {
+    return <CoachDashboard coachId={userId} coachName={userName} />;
+  }
+
+  // --- Shooter dashboard ---
+  // Fetch coachId for the shooter to show "My Coach" info
+  const shooterDoc = await Shooter.findById(userId).select("coachId").lean();
+  const coachId = (shooterDoc as any)?.coachId ?? null;
+  let coachInfo: { name: string; organization?: string } | null = null;
+  if (coachId) {
+    const coach = await Shooter.findById(coachId).select("name organization").lean();
+    if (coach) {
+      coachInfo = { name: (coach as any).name, organization: (coach as any).organization };
+    }
+  }
+
+  const sessions = await Session.find({ shooterId: userId })
     .sort({ startedAt: -1 })
     .limit(20)
     .lean();
 
-  const totalSessions = await Session.countDocuments({ shooterId });
+  const totalSessions = await Session.countDocuments({ shooterId: userId });
   const totalShots = await Shot.countDocuments({
     sessionId: { $in: sessions.map((session) => session._id) },
   });
@@ -73,19 +92,38 @@ export default async function DashboardPage() {
       <div className="page-container">
         <header className="site-header">
           <BrandMark showSubtitle={false} href="/dashboard" />
-          <AccountMenu />
+          <AccountMenu role="shooter" />
         </header>
 
         <section className="page-heading">
           <p className="eyebrow">Shooter dashboard</p>
           <h1 className="page-title">
-            Welcome{shooterName ? `, ${shooterName}` : ""}
+            Welcome{userName ? `, ${userName}` : ""}
           </h1>
           <p className="muted-copy">
             Review your latest VR sessions, performance trends, and shot
             patterns from one control room.
           </p>
         </section>
+
+        {coachInfo ? (
+          <section className="panel coach-banner">
+            <p className="eyebrow">Your coach</p>
+            <p className="coach-banner__name">{coachInfo.name}</p>
+            {coachInfo.organization && (
+              <p className="muted-copy">{coachInfo.organization}</p>
+            )}
+          </section>
+        ) : (
+          <section className="panel coach-banner coach-banner--empty">
+            <p className="muted-copy">
+              You don&rsquo;t have a coach yet.{" "}
+              <Link href="/dashboard/find-coach" className="text-link">
+                Find and join a coach
+              </Link>
+            </p>
+          </section>
+        )}
 
         <section className="stats-grid dashboard-stats-grid">
           <SummaryCard
@@ -183,6 +221,148 @@ export default async function DashboardPage() {
   );
 }
 
+async function CoachDashboard({
+  coachId,
+  coachName,
+}: {
+  coachId: string;
+  coachName: string | null;
+}) {
+  const shooters = await Shooter.find({ coachId })
+    .select("name email organization createdAt")
+    .lean();
+
+  const shooterData = await Promise.all(
+    shooters.map(async (shooter: any) => {
+      const latestSession = await Session.findOne({ shooterId: shooter._id })
+        .sort({ startedAt: -1 })
+        .select("_id startedAt gunPreset targetType summary")
+        .lean();
+      return { shooter, latestSession };
+    })
+  );
+
+  const pendingCount = await CoachRequest.countDocuments({ coachId, status: "pending" });
+
+  const activeThisMonth = shooterData.filter(({ latestSession }) => {
+    if (!latestSession) return false;
+    const ms = Date.now() - new Date((latestSession as any).startedAt).getTime();
+    return ms < 30 * 24 * 60 * 60 * 1000;
+  }).length;
+
+  return (
+    <main className="theme-shell dashboard-page">
+      <LogToken />
+
+      <div className="page-container">
+        <header className="site-header">
+          <BrandMark showSubtitle={false} href="/dashboard" />
+          <AccountMenu role="coach" pendingRequests={pendingCount} />
+        </header>
+
+        <section className="page-heading">
+          <p className="eyebrow">Coach dashboard</p>
+          <h1 className="page-title">
+            Welcome{coachName ? `, ${coachName}` : ""}
+          </h1>
+          <p className="muted-copy">
+            Monitor your shooters&rsquo; latest sessions and performance trends.
+          </p>
+        </section>
+
+        <section className="stats-grid dashboard-stats-grid">
+          <SummaryCard
+            className="dashboard-summary-card dashboard-summary-card--metric"
+            label="Total shooters"
+            value={shooters.length.toString()}
+          />
+          <SummaryCard
+            className="dashboard-summary-card dashboard-summary-card--metric"
+            label="Active this month"
+            value={activeThisMonth.toString()}
+          />
+          {pendingCount > 0 && (
+            <SummaryCard
+              className="dashboard-summary-card dashboard-summary-card--session"
+              label="Pending join requests"
+              value={pendingCount.toString()}
+              subtitle={
+                <Link href="/dashboard/coach/requests" className="text-link">
+                  Review requests
+                </Link>
+              }
+            />
+          )}
+        </section>
+
+        <div className="action-row dashboard-action-row">
+          <Link
+            href="/experience"
+            className="button button-primary button-small dashboard-start-button"
+          >
+            Start VR experience
+          </Link>
+        </div>
+
+        <section className="panel section-stack">
+          <div>
+            <p className="eyebrow">Roster</p>
+            <h2 className="section-title">Your shooters</h2>
+          </div>
+
+          {shooterData.length === 0 ? (
+            <p className="empty-state">
+              No shooters yet. Share your name so shooters can find and request to join you.
+            </p>
+          ) : (
+            <div className="table-shell">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Shooter</th>
+                    <th>Organisation</th>
+                    <th>Last session</th>
+                    <th>Avg score</th>
+                    <th>Total score</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shooterData.map(({ shooter, latestSession }: any) => (
+                    <tr key={shooter._id.toString()}>
+                      <td>{shooter.name}</td>
+                      <td>{shooter.organization ?? "-"}</td>
+                      <td>
+                        {latestSession
+                          ? new Date(latestSession.startedAt).toLocaleDateString()
+                          : "No sessions"}
+                      </td>
+                      <td>
+                        {latestSession?.summary?.averageScore
+                          ? latestSession.summary.averageScore.toFixed(1)
+                          : "-"}
+                      </td>
+                      <td>{latestSession?.summary?.totalScore ?? "-"}</td>
+                      <td>
+                        <Link
+                          href={`/dashboard/coach/shooter/${shooter._id.toString()}`}
+                          className="text-link"
+                        >
+                          View sessions
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}
+
 function SummaryCard({
   label,
   value,
@@ -192,7 +372,7 @@ function SummaryCard({
 }: {
   label: string;
   value: ReactNode;
-  subtitle?: string;
+  subtitle?: ReactNode;
   className?: string;
   valueClassName?: string;
 }) {
