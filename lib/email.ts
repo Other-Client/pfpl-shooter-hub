@@ -82,7 +82,7 @@ function renderEmailShell(opts: {
       ? `
         <p style="margin:28px 0 0;">
           <a href="${escapeHtml(opts.ctaUrl)}"
-             style="display:inline-block;padding:14px 28px;border-radius:999px;background:#efbf04;color:#1b1400;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.02em;">
+             style="display:inline-block;padding:14px 28px;border-radius:999px;background:#ed0100;color:#fff4f2;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.02em;">
             ${escapeHtml(opts.ctaLabel)}
           </a>
         </p>
@@ -105,15 +105,15 @@ function renderEmailShell(opts: {
 
                 <!-- Header card -->
                 <tr>
-                  <td style="background:#0c0c0c;border-radius:20px 20px 0 0;padding:32px 36px 28px;">
+                  <td style="background:#0b0f14;border-radius:20px 20px 0 0;padding:32px 36px 28px;">
                     ${logoImg}
-                    <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#efbf04;margin-bottom:10px;font-weight:600;">
+                    <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#ed0100;margin-bottom:10px;font-weight:600;">
                       PreciShot
                     </div>
-                    <h1 style="margin:0 0 12px;font-size:26px;line-height:1.1;color:#f7f2e4;font-weight:700;">
+                    <h1 style="margin:0 0 12px;font-size:26px;line-height:1.1;color:#f4f7fa;font-weight:700;">
                       ${escapeHtml(opts.title)}
                     </h1>
-                    <p style="margin:0;color:#b8b0a2;line-height:1.65;font-size:15px;">
+                    <p style="margin:0;color:#aab4bf;line-height:1.65;font-size:15px;">
                       ${escapeHtml(opts.intro)}
                     </p>
                     ${cta}
@@ -191,7 +191,7 @@ export async function sendVerificationEmail(input: VerificationEmailInput) {
       If the button doesn't work, copy and paste this URL into your browser:
     </p>
     <p style="margin:0;word-break:break-all;">
-      <a href="${escapeHtml(input.verifyUrl)}" style="color:#b8860b;">${escapeHtml(input.verifyUrl)}</a>
+      <a href="${escapeHtml(input.verifyUrl)}" style="color:#d10100;">${escapeHtml(input.verifyUrl)}</a>
     </p>
     <hr style="margin:24px 0;border:none;border-top:1px solid #ede8dc;" />
     <p style="margin:0;color:#6b6459;font-size:13px;">
@@ -276,7 +276,7 @@ export async function sendPasswordResetEmail(input: PasswordResetEmailInput) {
     </p>
     <p style="margin:0 0 18px;word-break:break-all;">
       Or paste this URL into your browser:<br />
-      <a href="${escapeHtml(input.resetUrl)}" style="color:#b8860b;">${escapeHtml(input.resetUrl)}</a>
+      <a href="${escapeHtml(input.resetUrl)}" style="color:#d10100;">${escapeHtml(input.resetUrl)}</a>
     </p>
     <hr style="margin:24px 0;border:none;border-top:1px solid #ede8dc;" />
     <p style="margin:0;color:#6b6459;font-size:13px;">

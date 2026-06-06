@@ -17,13 +17,13 @@ interface PaintHeatmapOptions {
 }
 
 const DEFAULTS: Required<PaintHeatmapOptions> = {
-  background: "#050505",
-  guideRing: "rgba(239,191,4,0.2)",
-  crosshair: "rgba(239,191,4,0.1)",
-  glowInner: "rgba(239,191,4,0.9)",
-  glowOuter: "rgba(239,191,4,0)",
-  markerRing: "rgba(255,243,207,0.95)",
-  markerDot: "#efbf04",
+  background: "#0b0f14",
+  guideRing: "rgba(237,1,0,0.26)",
+  crosshair: "rgba(237,1,0,0.16)",
+  glowInner: "rgba(237,1,0,0.9)",
+  glowOuter: "rgba(237,1,0,0)",
+  markerRing: "rgba(255,210,205,0.95)",
+  markerDot: "#ed0100",
   glowRadius: 18,
   markerRingRadius: 7,
   markerDotRadius: 3,

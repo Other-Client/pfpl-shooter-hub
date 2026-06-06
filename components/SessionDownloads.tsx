@@ -43,9 +43,9 @@ function drawHeatmap(
 ) {
   const {
     size = 260,
-    bg = "#050505",
-    ring = "rgba(239,191,4,0.3)",
-    dot = "#efbf04",
+    bg = "#0b0f14",
+    ring = "rgba(237,1,0,0.34)",
+    dot = "#ed0100",
   } = opts;
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -59,7 +59,7 @@ function drawHeatmap(
   paintShotHeatmap(ctx, shots, {
     background: bg,
     guideRing: ring,
-    crosshair: "rgba(239,191,4,0.14)",
+    crosshair: "rgba(237,1,0,0.16)",
     markerDot: dot,
     glowRadius: 20,
     markerRingRadius: 7.5,
@@ -88,9 +88,9 @@ export function SessionDownloads({
   const heatmapDataUrl = useMemo(
     () =>
       drawHeatmap(shots, {
-        bg: "#050505",
-        ring: "rgba(239,191,4,0.3)",
-        dot: "#efbf04",
+        bg: "#0b0f14",
+        ring: "rgba(237,1,0,0.34)",
+        dot: "#ed0100",
       }),
     [shots]
   );
@@ -161,7 +161,7 @@ export function SessionDownloads({
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.setTextColor(239, 191, 4);
+    doc.setTextColor(237, 1, 0);
     doc.text("PreciShot Session Summary", left, y + 4);
 
     doc.setFont("helvetica", "normal");
@@ -230,7 +230,7 @@ export function SessionDownloads({
       doc.setFillColor(8, 8, 8);
       doc.rect(14, tableY - 4, 176, 7, "F");
       doc.setFontSize(10);
-      doc.setTextColor(239, 191, 4);
+      doc.setTextColor(237, 1, 0);
       doc.setFont("helvetica", "bold");
       headers.forEach((header, index) => doc.text(header, colX[index], tableY));
       tableY += rowHeight;
